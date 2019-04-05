@@ -1,5 +1,6 @@
 #include <iostream>
 #include <time.h>
+#include <opencv2/highgui.hpp>
 
 using std::cout;
 
@@ -28,6 +29,9 @@ void main()
 
 	cout << "run time = " << clock() - start << "millisec.\n";
 	
+	cv::Mat  image(300, 400, CV_8UC1, cv::Scalar(200));
+	cv::imshow("영상보기", image);
+	cv::waitKey(0);
 }
 
 template<typename T, size_t N>
