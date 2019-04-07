@@ -163,12 +163,9 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp" />
-    <ClCompile Include="OpenMP_Mult.cpp" />
-    <ClCompile Include="STD_Mult.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="OpenMP_Mult.h" />
-    <ClInclude Include="STD_Mult.h" />
+    <ClInclude Include="Strassen.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

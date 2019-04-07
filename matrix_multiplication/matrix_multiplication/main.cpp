@@ -1,27 +1,17 @@
 #pragma once
 
-#include <iostream>
+#include "Strassen.h"
 #include <opencv2\opencv.hpp>
 #include <time.h>
 #include <chrono>
 
-using std::cout;
 using cv::Mat;
 using std::chrono::high_resolution_clock;
 
-template<typename T, size_t N>
-void MatrixDisp(const T A[N][N]);
-
-template<typename T, size_t N>
-void MatrixMult_Standard(const T A[N][N], const T B[N][N], T C[N][N]);
-
-template<typename T, size_t N>
-void MatrixMult_OpenMP(const T A[N][N], const T B[N][N], T C[N][N]);
-
 void main()
 {
-	const size_t N = 250;
-	static_assert(N < 257, "Matrix dimension must be less than 257");
+	const int N = 8;
+	static_assert(1 < N && N < 257, "Matrix dimension must be greater than 1 and less than 257");
 
 	Mat cv_A(N, N, CV_32F);
 	Mat cv_B(N, N, CV_32F);
@@ -45,7 +35,8 @@ void main()
 		}
 	}
 
-#ifdef _DEBUG
+// Matrix Disp
+#ifdef _DEBUG 
 	cout << "Matrix A: \n";
 	MatrixDisp<float, N>(A);
 	cout << "Matrix B: \n";
@@ -62,12 +53,13 @@ void main()
 
 	clock_t cstart = clock();
 	cv_A * cv_B;
-	cout << "opencv run time = " << clock() - cstart << "mms.\n\n";
+	cout << "opencv run time = " << clock() - cstart << "mm sec.\n\n";
 
 	start = high_resolution_clock::now();
 	MatrixMult_Standard<float, N>(A, B, C);
 	end = high_resolution_clock::now();
 
+// Matrix Disp
 #ifdef _DEBUG
 	cout << "(Standard) A x B  \n";
 	MatrixDisp<float, N>(C);
@@ -77,13 +69,13 @@ void main()
 
 	cstart = clock();
 	MatrixMult_Standard<float, N>(A, B, C);
-	cout << "standard run time = " << clock() - cstart << "mms.\n\n";
-///////////////////////////////////////////////////////////////////////////////////////////
+	cout << "standard run time = " << clock() - cstart << "mm sec.\n\n";
 
 	start = high_resolution_clock::now();
 	MatrixMult_OpenMP<float, N>(A, B, C);
 	end = high_resolution_clock::now();
 
+// Matrix Disp
 #ifdef _DEBUG
 	cout << "(OpenMP) A x B  \n";
 	MatrixDisp<float, N>(C);
@@ -93,72 +85,8 @@ void main()
 
 	cstart = clock();
 	MatrixMult_OpenMP<float, N>(A, B, C);
-	cout << "OpenMP run time = " << clock() - cstart << "mms.\n\n";
-}
+	cout << "OpenMP run time = " << clock() - cstart << "mm sec.\n\n";
 
-template<typename T, size_t N>
-void MatrixDisp(const T A[N][N])
-{
-	static_assert(N > 1, "Matrix dimension must be greater than 1");
-
-	cout << "[";
-	for (int i = 0; i < N; i++)
-	{
-		for (int j = 0; j < N; j++)
-		{
-			cout << A[i][j];
-			if ( j != N-1) { cout << ", "; }
-		}
-
-		if (i != N - 1) { cout << ";\n "; }
-
-	}
-	cout << "]\n\n";
-}
-
-template<typename T, size_t N>
-void MatrixMult_Standard(const T A[N][N], const T B[N][N], T C[N][N])
-{
-	static_assert(N > 1, "Matrix dimension must be greater than 1");
-
-	T dot_product;
-
-	for (int i = 0; i < N; i++)
-	{
-		for (int j = 0; j < N; j++)
-		{
-			dot_product = 0;
-
-			for (int k = 0; k < N; k++)
-			{
-				dot_product += A[i][k] * B[k][j];
-			}
-
-			C[i][j] = dot_product;
-		}
-	}
-}
-
-template<typename T, size_t N>
-void MatrixMult_OpenMP(const T A[N][N], const T B[N][N], T C[N][N])
-{
-	static_assert(N > 1, "Matrix dimension must be greater than 1");
-
-	T dot_product;
-	
-	#pragma omp parallel for
-	for (int i = 0; i < N; i++)
-	{
-		for (int j = 0; j < N; j++)
-		{
-			dot_product = 0;
-
-			for (int k = 0; k < N; k++)
-			{
-				dot_product += A[i][k] * B[k][j];
-			}
-
-			C[i][j] = dot_product;
-		}
-	}
+	MatrixMult_Strassen<float, N>(A, B, C);
+	//MatrixDisp<float, N>(C);
 }
