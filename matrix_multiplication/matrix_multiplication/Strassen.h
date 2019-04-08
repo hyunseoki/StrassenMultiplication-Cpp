@@ -5,7 +5,7 @@
 // Small letter 'n' may be difference from capital letter 'N' for matrix calculation prupose
 // Some operation may not calculate using whole elements
 
-const int N = 4;
+const int N = 32;
 using std::cout;
 
 template<typename T>
@@ -77,7 +77,7 @@ void MatrixSum(const int n, const T A[][N], const T B[][N], T C[][N])
 #pragma omp parallel for
 	for (int i = 0; i < n; i++)
 	{
-		for (int j = 0; j < n; j++)
+ 		for (int j = 0; j < n; j++)
 		{
 			C[i][j] = A[i][j] + B[i][j];
 		}
@@ -87,6 +87,7 @@ void MatrixSum(const int n, const T A[][N], const T B[][N], T C[][N])
 template<typename T>
 void MatrixSubs(const int n, const T A[][N], const T B[][N], T C[][N])
 {
+#pragma omp parallel for
 	for (int i = 0; i < n; i++)
 	{
 		for (int j = 0; j < n; j++)
@@ -104,7 +105,7 @@ void MatrixMult_Strassen(const int n, const T A[][N], const T B[][N], T C[][N])
 
 	if (n == 2) 
 	{  
-		MatrixMult_OpenMP<T>(n, A, B, C);
+		MatrixMult_OpenMP(n, A, B, C);
 		return;
 	}
 
@@ -115,7 +116,7 @@ void MatrixMult_Strassen(const int n, const T A[][N], const T B[][N], T C[][N])
 		M_5[N][N], M_6[N][N], M_7[N][N], temp_A[N][N], temp_B[N][N];
 
 	//Matrix Division
-	for (i = 0; i < mid; i++)
+   	for (i = 0; i < mid; i++)
 	{
 		for (j =0; j < mid ; j++)
 		{
@@ -134,7 +135,7 @@ void MatrixMult_Strassen(const int n, const T A[][N], const T B[][N], T C[][N])
 	// M1 = (A11 + A22) * (B11 + B22)
 	MatrixSum(mid, A_11, A_22, temp_A);
 	MatrixSum(mid, B_11, B_22, temp_B);
-	MatrixMult_Strassen(mid, A_11, A_22, temp_A);
+ 	MatrixMult_Strassen(mid, temp_A, temp_B, M_1);
 
 	// M2 = (A21 + A22) * B11
 	MatrixSum(mid, A_21, A_22, temp_A);
@@ -167,7 +168,7 @@ void MatrixMult_Strassen(const int n, const T A[][N], const T B[][N], T C[][N])
 	MatrixSubs(mid, temp_A, M_5, temp_B);
 	MatrixSum(mid, temp_B, M_7, C_11);
 
-	// C21 = M2 + M4
+	// C21 = M3 + M5
 	MatrixSum(mid, M_3, M_5, C_12);
 
 	// C21 = M2 + M4
