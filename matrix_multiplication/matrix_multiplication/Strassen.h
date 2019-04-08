@@ -1,10 +1,12 @@
 #pragma once
 #include <iostream>
-const int N = 256;
-using std::cout;
 
+// https://en.wikipedia.org/wiki/Strassen_algorithm
 // Small letter 'n' may be difference from capital letter 'N' for matrix calculation prupose
 // Some operation may not calculate using whole elements
+
+const int N = 4;
+using std::cout;
 
 template<typename T>
 void MatrixDisp(const int n, const T A[][N])
@@ -29,6 +31,7 @@ void MatrixMult_Standard(const int n, const T A[][N], const T B[][N], T C[][N])
 {
 	T dot_product;
 
+#pragma omp parallel for
 	for (int i = 0; i < n; i++)
 	{
 		for (int j = 0; j < n; j++)
@@ -70,6 +73,8 @@ void MatrixMult_OpenMP(const int n, const T A[][N], const T B[][N], T C[][N])
 template<typename T>
 void MatrixSum(const int n, const T A[][N], const T B[][N], T C[][N])
 {
+
+#pragma omp parallel for
 	for (int i = 0; i < n; i++)
 	{
 		for (int j = 0; j < n; j++)
@@ -126,42 +131,52 @@ void MatrixMult_Strassen(const int n, const T A[][N], const T B[][N], T C[][N])
 		}
 	}
 
-	MatrixSum<float>(mid, A_11, A_22, temp_A);
-	MatrixSum<float>(mid, B_11, B_22, temp_B);
+	// M1 = (A11 + A22) * (B11 + B22)
+	MatrixSum(mid, A_11, A_22, temp_A);
+	MatrixSum(mid, B_11, B_22, temp_B);
+	MatrixMult_Strassen(mid, A_11, A_22, temp_A);
 
-	MatrixMult_Strassen<float>(mid, A_11, A_22, temp_A);
+	// M2 = (A21 + A22) * B11
+	MatrixSum(mid, A_21, A_22, temp_A);
+	MatrixMult_Strassen(mid, temp_A, B_11, M_2);
 
-	MatrixSum<float>(mid, A_21, A_22, temp_A);
-	MatrixMult_Strassen<float>(mid, temp_A, B_11, M_2);
+	// M3 = A11 * (B12-B22)
+	MatrixSubs(mid, B_12, B_22, temp_B);
+	MatrixMult_Strassen(mid, A_11, temp_B, M_3);
 
-	MatrixSubs<float>(mid, B_12, B_22, temp_B);
-	MatrixMult_Strassen<float>(mid, A_11, temp_B, M_3);
+	// M4 = A22 * (B21 - B11)
+	MatrixSubs(mid, B_21, B_11, temp_B);
+	MatrixMult_Strassen(mid, A_22, temp_B, M_4);
 
-	MatrixSubs<float>(mid, B_21, B_11, temp_B);
-	MatrixMult_Strassen<float>(mid, A_22, temp_B, M_4);
+	// M5 = (A11 + A12) * B22
+	MatrixSum(mid, A_11, A_12, temp_A);
+	MatrixMult_Strassen(mid, temp_A, B_22, M_5);
 
-	MatrixSum<float>(mid, A_11, A_12, temp_A);
-	MatrixMult_Strassen<float>(mid, temp_A, B_22, M_5);
+	// M6 = (A21 - A11) * (B11 + B12)
+	MatrixSubs(mid, A_21, A_11, temp_A);
+	MatrixSum(mid, B_11, B_12, temp_B);
+	MatrixMult_Strassen(mid, temp_A, temp_B, M_6);
 
-	MatrixSubs<float>(mid, A_21, A_11, temp_A);
-	MatrixSum<float>(mid, B_11, B_12, temp_B);
-	MatrixMult_Strassen<float>(mid, temp_A, temp_B, M_6);
+	// M7 = (A12 - A22) * (B21 + B22)
+	MatrixSubs(mid, A_12, A_22, temp_A);
+	MatrixSum(mid, B_21, B_22, temp_B);
+	MatrixMult_Strassen(mid, temp_A, temp_B, M_7);
 
-	MatrixSubs<float>(mid, A_12, A_22, temp_A);
-	MatrixSum<float>(mid, B_21, B_22, temp_B);
-	MatrixMult_Strassen<float>(mid, temp_A, temp_B, M_7);
+	// C11 = M1 + M4 - M5 + M7
+	MatrixSum(mid, M_1, M_4, temp_A);
+	MatrixSubs(mid, temp_A, M_5, temp_B);
+	MatrixSum(mid, temp_B, M_7, C_11);
 
-	MatrixSum<float>(mid, M_1, M_4, temp_A);
-	MatrixSubs<float>(mid, temp_A, M_5, temp_B);
-	MatrixSum<float>(mid, temp_B, M_7, C_11);
+	// C21 = M2 + M4
+	MatrixSum(mid, M_3, M_5, C_12);
 
-	MatrixSum<float>(mid, M_3, M_5, C_12);
+	// C21 = M2 + M4
+	MatrixSum(mid, M_2, M_4, C_21);
 
-	MatrixSum<float>(mid, M_2, M_4, C_21);
-
-	MatrixSum<float>(mid, M_1, M_3, temp_A);
-	MatrixSubs<float>(mid, temp_A, M_2, temp_B);
-	MatrixSum<float>(mid, temp_B, M_6, C_22);
+	// C22 = M1 - M2 + M3 + M6
+	MatrixSum(mid, M_1, M_3, temp_A);
+	MatrixSubs(mid, temp_A, M_2, temp_B);
+	MatrixSum(mid, temp_B, M_6, C_22);
 
 	for (i = 0; i < mid; i++)
 	{
