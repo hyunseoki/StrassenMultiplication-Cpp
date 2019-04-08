@@ -1,38 +1,41 @@
 #pragma once
 #include <iostream>
-
+const int N = 256;
 using std::cout;
 
-template<typename T, size_t N>
-void MatrixDisp(const T A[N][N])
+// Small letter 'n' may be difference from capital letter 'N' for matrix calculation prupose
+// Some operation may not calculate using whole elements
+
+template<typename T>
+void MatrixDisp(const int n, const T A[][N])
 {
 	cout << "[";
-	for (int i = 0; i < N; i++)
+	for (int i = 0; i < n; i++)
 	{
-		for (int j = 0; j < N; j++)
+		for (int j = 0; j < n; j++)
 		{
 			cout << A[i][j];
-			if (j != N - 1) { cout << ", "; }
+			if (j != n - 1) { cout << ", "; }
 		}
 
-		if (i != N - 1) { cout << ";\n "; }
+		if (i != n - 1) { cout << ";\n "; }
 
 	}
 	cout << "]\n\n";
 }
 
-template<typename T, size_t N>
-void MatrixMult_Standard(const T A[N][N], const T B[N][N], T C[N][N])
+template<typename T>
+void MatrixMult_Standard(const int n, const T A[][N], const T B[][N], T C[][N])
 {
 	T dot_product;
 
-	for (int i = 0; i < N; i++)
+	for (int i = 0; i < n; i++)
 	{
-		for (int j = 0; j < N; j++)
+		for (int j = 0; j < n; j++)
 		{
 			dot_product = 0;
 
-			for (int k = 0; k < N; k++)
+			for (int k = 0; k < n; k++)
 			{
 				dot_product += A[i][k] * B[k][j];
 			}
@@ -42,19 +45,19 @@ void MatrixMult_Standard(const T A[N][N], const T B[N][N], T C[N][N])
 	}
 }
 
-template<typename T, size_t N>
-void MatrixMult_OpenMP(const T A[N][N], const T B[N][N], T C[N][N])
+template<typename T>
+void MatrixMult_OpenMP(const int n, const T A[][N], const T B[][N], T C[][N])
 {
 	T dot_product;
 
 #pragma omp parallel for
-	for (int i = 0; i < N; i++)
+	for (int i = 0; i < n; i++)
 	{
-		for (int j = 0; j < N; j++)
+		for (int j = 0; j < n; j++)
 		{
 			dot_product = 0;
 
-			for (int k = 0; k < N; k++)
+			for (int k = 0; k < n; k++)
 			{
 				dot_product += A[i][k] * B[k][j];
 			}
@@ -64,47 +67,47 @@ void MatrixMult_OpenMP(const T A[N][N], const T B[N][N], T C[N][N])
 	}
 }
 
-template<typename T, size_t N>
-void MatrixSum(const T A[N][N], const T B[N][N], T C[N][N])
+template<typename T>
+void MatrixSum(const int n, const T A[][N], const T B[][N], T C[][N])
 {
-	for (int i = 0; i < N; i++)
+	for (int i = 0; i < n; i++)
 	{
-		for (int j = 0; j < N; j++)
+		for (int j = 0; j < n; j++)
 		{
 			C[i][j] = A[i][j] + B[i][j];
 		}
 	}
 }
 
-template<typename T, size_t N>
-void MatrixSubs(const T A[N][N], const T B[N][N], T C[N][N])
+template<typename T>
+void MatrixSubs(const int n, const T A[][N], const T B[][N], T C[][N])
 {
-	for (int i = 0; i < N; i++)
+	for (int i = 0; i < n; i++)
 	{
-		for (int j = 0; j < N; j++)
+		for (int j = 0; j < n; j++)
 		{
 			C[i][j] = A[i][j] - B[i][j];
 		}
 	}
 }
 
-template<typename T, size_t N>
-void MatrixMult_Strassen(const T A[][N], const T B[][N], T C[][N])
+template<typename T>
+void MatrixMult_Strassen(const int n, const T A[][N], const T B[][N], T C[][N])
 {
 	int i, j;
-	const int mid = N / 2;
+	int mid = n / 2;
 
-	if (N == 2) 
+	if (n == 2) 
 	{  
-		MatrixMult_OpenMP<T, N>(A, B, C);
+		MatrixMult_OpenMP<T>(n, A, B, C);
 		return;
 	}
 
-	T A_11[mid][mid], A_12[mid][mid], A_21[mid][mid], A_22[mid][mid],
-		B_11[mid][mid], B_12[mid][mid], B_21[mid][mid], B_22[mid][mid],
-		C_11[mid][mid], C_12[mid][mid], C_21[mid][mid], C_22[mid][mid],
-		M_1[mid][mid], M_2[mid][mid], M_3[mid][mid], M_4[mid][mid],
-		M_5[mid][mid], M_6[mid][mid], M_7[mid][mid], temp_A[mid][mid], temp_B[mid][mid];
+	T A_11[N][N], A_12[N][N], A_21[N][N], A_22[N][N],
+		B_11[N][N], B_12[N][N], B_21[N][N], B_22[N][N],
+		C_11[N][N], C_12[N][N], C_21[N][N], C_22[N][N],
+		M_1[N][N], M_2[N][N], M_3[N][N], M_4[N][N],
+		M_5[N][N], M_6[N][N], M_7[N][N], temp_A[N][N], temp_B[N][N];
 
 	//Matrix Division
 	for (i = 0; i < mid; i++)
@@ -123,51 +126,51 @@ void MatrixMult_Strassen(const T A[][N], const T B[][N], T C[][N])
 		}
 	}
 
-	MatrixSum<T, mid>(A_11, A_22, temp_A);
-	MatrixSum<T, mid>(B_11, B_22, temp_B);
+	MatrixSum<float>(mid, A_11, A_22, temp_A);
+	MatrixSum<float>(mid, B_11, B_22, temp_B);
 
-	MatrixMult_Strassen<T, mid>(A_11, A_22, temp_A);
+	MatrixMult_Strassen<float>(mid, A_11, A_22, temp_A);
 
-	//MatrixSum<float, N / 2>(A_21, A_22, temp_A);
-	//MatrixMult_Strassen<float, N / 2>(temp_A, B_11, M_2);
+	MatrixSum<float>(mid, A_21, A_22, temp_A);
+	MatrixMult_Strassen<float>(mid, temp_A, B_11, M_2);
 
-	//MatrixSubs<float, N / 2>(N / 2, B_12, B_22, temp_B);
-	//MatrixMult_Strassen<float, N / 2>(N / 2, A_11, temp_B, M_3);
+	MatrixSubs<float>(mid, B_12, B_22, temp_B);
+	MatrixMult_Strassen<float>(mid, A_11, temp_B, M_3);
 
-	//MatrixSubs<float, N / 2>(N / 2, B_21, B_11, temp_B);
-	//MatrixMult_Strassen<float, N / 2>(N / 2, A_22, temp_B, M_4);
+	MatrixSubs<float>(mid, B_21, B_11, temp_B);
+	MatrixMult_Strassen<float>(mid, A_22, temp_B, M_4);
 
-	//MatrixSum<float, N / 2>(N / 2, A_11, A_12, temp_A);
-	//MatrixMult_Strassen<float, N / 2>(N / 2, temp_A, B_22, M_5);
+	MatrixSum<float>(mid, A_11, A_12, temp_A);
+	MatrixMult_Strassen<float>(mid, temp_A, B_22, M_5);
 
-	//MatrixSubs<float, N / 2>(N / 2, A_21, A_11, temp_A);
-	//MatrixSum<float, N / 2>(N / 2, B_11, B_12, temp_B);
-	//MatrixMult_Strassen<float, N / 2>(N / 2, temp_A, temp_B, M_6);
+	MatrixSubs<float>(mid, A_21, A_11, temp_A);
+	MatrixSum<float>(mid, B_11, B_12, temp_B);
+	MatrixMult_Strassen<float>(mid, temp_A, temp_B, M_6);
 
-	//MatrixSubs<float, N / 2>(N / 2, A_12, A_22, temp_A);
-	//MatrixSum<float, N / 2>(N / 2, B_21, B_22, temp_B);
-	//MatrixMult_Strassen<float, N / 2>(N / 2, temp_A, temp_B, M_7);
+	MatrixSubs<float>(mid, A_12, A_22, temp_A);
+	MatrixSum<float>(mid, B_21, B_22, temp_B);
+	MatrixMult_Strassen<float>(mid, temp_A, temp_B, M_7);
 
-	//MatrixSum<float, N / 2>(N / 2, M_1, M_4, temp_A);
-	//MatrixSubs<float, N / 2>(N / 2, temp_A, M_5, temp_B);
-	//MatrixSum<float, N / 2>(N / 2, temp_B, M_7, C_11);
+	MatrixSum<float>(mid, M_1, M_4, temp_A);
+	MatrixSubs<float>(mid, temp_A, M_5, temp_B);
+	MatrixSum<float>(mid, temp_B, M_7, C_11);
 
-	//MatrixSum<float, N / 2>(N / 2, M_3, M_5, C_12);
+	MatrixSum<float>(mid, M_3, M_5, C_12);
 
-	//MatrixSum<float, N / 2>(N / 2, M_2, M_4, C_21);
+	MatrixSum<float>(mid, M_2, M_4, C_21);
 
-	//MatrixSum<float, N / 2>(N / 2, M_1, M_3, temp_A);
-	//MatrixSubs<float, N / 2>(N / 2, temp_A, M_2, temp_B);
-	//MatrixSum<float, N / 2>(N / 2, temp_B, M_6, C_22);
+	MatrixSum<float>(mid, M_1, M_3, temp_A);
+	MatrixSubs<float>(mid, temp_A, M_2, temp_B);
+	MatrixSum<float>(mid, temp_B, M_6, C_22);
 
-	//for (i = 0; i < mid; i++)
-	//{
-	//	for (j = 0; j < mid; j++)
-	//	{
-	//		C[i][j]             = C_11[i][j];
-	//		C[i][j + mid]       = C_12[i][j];
-	//		C[i + mid][j]       = C_21[i][j];
-	//		C[i + mid][j + mid] = C_22[i][j];
-	//	}
-	//}
+	for (i = 0; i < mid; i++)
+	{
+		for (j = 0; j < mid; j++)
+		{
+			C[i][j]             = C_11[i][j];
+			C[i][j + mid]       = C_12[i][j];
+			C[i + mid][j]       = C_21[i][j];
+			C[i + mid][j + mid] = C_22[i][j];
+		}
+	}
 }
