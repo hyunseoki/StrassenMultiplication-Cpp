@@ -20,7 +20,10 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Strassen.h">
+    <ClInclude Include="Strassen_Array.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="Stranssen_Vector.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
   </ItemGroup>

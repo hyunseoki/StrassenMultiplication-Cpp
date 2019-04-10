@@ -2,10 +2,10 @@
 #include <iostream>
 
 // https://en.wikipedia.org/wiki/Strassen_algorithm
-// Small letter 'n' may be difference from capital letter 'N' for matrix calculation prupose
+// Small letter 'n' which means size of matrix may be difference from capital letter 'N' which means size of array
 // Some operation may not calculate using whole elements
 
-const int N = 32;
+const int N = 157;
 using std::cout;
 
 template<typename T>
@@ -16,8 +16,8 @@ void MatrixDisp(const int n, const T A[][N])
 	{
 		for (int j = 0; j < n; j++)
 		{
-			cout << A[i][j];
-			if (j != n - 1) { cout << ", "; }
+			cout << A[i][j];			if (j != n - 1) { cout << ", "; }
+
 		}
 
 		if (i != n - 1) { cout << ";\n "; }
@@ -30,15 +30,14 @@ template<typename T>
 void MatrixMult_Standard(const int n, const T A[][N], const T B[][N], T C[][N])
 {
 	T dot_product;
-
-#pragma omp parallel for
-	for (int i = 0; i < n; i++)
+	int i, j, k;
+	for (i = 0; i < n; i++)
 	{
-		for (int j = 0; j < n; j++)
+		for (j = 0; j < n; j++)
 		{
 			dot_product = 0;
 
-			for (int k = 0; k < n; k++)
+			for (k = 0; k < n; k++)
 			{
 				dot_product += A[i][k] * B[k][j];
 			}
@@ -52,15 +51,15 @@ template<typename T>
 void MatrixMult_OpenMP(const int n, const T A[][N], const T B[][N], T C[][N])
 {
 	T dot_product;
-
-#pragma omp parallel for
-	for (int i = 0; i < n; i++)
+	int i, j, k;
+//#pragma omp parallel for private(j,k)
+	for (i = 0; i < n; i++)
 	{
-		for (int j = 0; j < n; j++)
+		for (j = 0; j < n; j++)
 		{
 			dot_product = 0;
 
-			for (int k = 0; k < n; k++)
+			for (k = 0; k < n; k++)
 			{
 				dot_product += A[i][k] * B[k][j];
 			}
@@ -73,7 +72,7 @@ void MatrixMult_OpenMP(const int n, const T A[][N], const T B[][N], T C[][N])
 template<typename T>
 void MatrixSum(const int n, const T A[][N], const T B[][N], T C[][N])
 {
-
+	int i, j;
 #pragma omp parallel for
 	for (int i = 0; i < n; i++)
 	{

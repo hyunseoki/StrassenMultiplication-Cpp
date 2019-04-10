@@ -165,7 +165,8 @@
     <ClCompile Include="main.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Strassen.h" />
+    <ClInclude Include="Stranssen_Vector.h" />
+    <ClInclude Include="Strassen_Array.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
