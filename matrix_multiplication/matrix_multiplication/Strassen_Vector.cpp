@@ -2,9 +2,6 @@
 
 int FindFaddingSize(const int n)
 {
-	// 10 < n < 500;
-	// 2^n 4, 16, 32, 64, 128, 256, 512
-
 	if (!(n & (n - 1))) return 0;
 	else if (n < 4)     return 4;
 	else if (n < 16)    return 16;

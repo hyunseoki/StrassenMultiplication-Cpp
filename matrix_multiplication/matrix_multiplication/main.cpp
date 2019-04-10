@@ -7,21 +7,14 @@
 
 void main()
 {
-	const int N = 5;
+	const int N = 200;
 	vector<vector<int>> A,B,C;
 	MatrixInit(N, &A);
 	MatrixInitEye(N, &B);
 	MatrixInit(N, &C);
 
 	MatrixDisp(N, &A);
-	//MatrixDisp(N, &B);
-
-	//MatrixSum(N, &A, &B, &C);
-	//MatrixDisp(N, &C);
-
-	//MatrixSubs(N, &A, &B, &C);
-	//MatrixDisp(N, &C);
-
+	
 	cout << "Standard Mult\n";
 	MatrixMult_Standard(N, &A, &B, &C);
 	MatrixDisp(N, &C);

@@ -137,12 +137,18 @@ void MatrixMult_Strassen(const int n, vector<vector<T>> * A, vector<vector<T>> *
 		return;
 	}
 
-	MatrixPadding(n, A);
-	MatrixPadding(n, B);
-	MatrixPadding(n, C);
+	int i, j, mid;
+	int paddingsize = FindFaddingSize(n);
 
-	int i, j;
-	int mid = n / 2;
+	if (paddingsize)
+	{
+		mid = paddingsize / 2;
+		MatrixPadding(paddingsize, A, B, C);
+	}
+	else
+	{
+		mid = n / 2;
+	}
 
 	vector<vector<T>> A_11(mid, vector<T>(mid)), A_12(mid, vector<T>(mid)), A_21(mid, vector<T>(mid)), A_22(mid, vector<T>(mid)),
 		B_11(mid, vector<T>(mid)), B_12(mid, vector<T>(mid)), B_21(mid, vector<T>(mid)), B_22(mid, vector<T>(mid)),
@@ -232,20 +238,19 @@ void MatrixMult_Strassen(const int n, vector<vector<T>> * A, vector<vector<T>> *
 int FindFaddingSize(const int n);
 
 template<typename T>
-void MatrixPadding(const int n, vector<vector<T>> * A)
+void MatrixPadding(const int n, vector<vector<T>> * A, vector<vector<T>> * B, vector<vector<T>> * C)
 {
 	int i;
-	int size = FindFaddingSize(n);
 
-	if (size) return;
-
-	A->resize(size);
-	for (i = 0; i < size; i++)
+	A->resize(n);
+	B->resize(n);
+	C->resize(n);
+	for (i = 0; i < n; i++)
 	{
-		(*A)[i].resize(size);
+		(*A)[i].resize(n);
+		(*B)[i].resize(n);
+		(*C)[i].resize(n);
 	}
-
-	MatrixDisp(size, A);
 }
 
 template<typename T>
