@@ -90,17 +90,14 @@ void MatrixMult_OpenMP(const int n, const vector<vector<T>> * A, const vector<ve
 		for (j = 0; j < n; j++)
 		{
 			dot_product = 0;
-
 			for (k = 0; k < n; k++)
 			{
 				dot_product += (*A)[i][k] * (*B)[k][j];
 			}
-
 			(*C)[i][j] = dot_product;
 		}
 	}
 }
-
 
 template<typename T>
 void MatrixSum(const int n, const vector<vector<T>> * A, const vector<vector<T>> * B, vector<vector<T>> * C)
@@ -115,7 +112,6 @@ void MatrixSum(const int n, const vector<vector<T>> * A, const vector<vector<T>>
 		}
 	}
 }
-
 
 template<typename T>
 void MatrixSubs(const int n, const vector<vector<T>> * A, const vector<vector<T>> * B, vector<vector<T>> * C)
@@ -132,7 +128,7 @@ void MatrixSubs(const int n, const vector<vector<T>> * A, const vector<vector<T>
 }
 
 template<typename T>
-void MatrixMult_Strassen(const int n, const vector<vector<T>> * A, const vector<vector<T>> * B, vector<vector<T>> * C)
+void MatrixMult_Strassen(const int n, vector<vector<T>> * A, vector<vector<T>> * B, vector<vector<T>> * C)
 {
 
 	if (n == 2)
@@ -141,10 +137,14 @@ void MatrixMult_Strassen(const int n, const vector<vector<T>> * A, const vector<
 		return;
 	}
 
+	MatrixPadding(n, A);
+	MatrixPadding(n, B);
+	MatrixPadding(n, C);
+
 	int i, j;
 	int mid = n / 2;
 
-	vector<vector<int>> A_11(mid, vector<T>(mid)), A_12(mid, vector<T>(mid)), A_21(mid, vector<T>(mid)), A_22(mid, vector<T>(mid)),
+	vector<vector<T>> A_11(mid, vector<T>(mid)), A_12(mid, vector<T>(mid)), A_21(mid, vector<T>(mid)), A_22(mid, vector<T>(mid)),
 		B_11(mid, vector<T>(mid)), B_12(mid, vector<T>(mid)), B_21(mid, vector<T>(mid)), B_22(mid, vector<T>(mid)),
 		C_11(mid, vector<T>(mid)), C_12(mid, vector<T>(mid)), C_21(mid, vector<T>(mid)), C_22(mid, vector<T>(mid)),
 		M_1(mid, vector<T>(mid)), M_2(mid, vector<T>(mid)), M_3(mid, vector<T>(mid)), M_4(mid, vector<T>(mid)),
@@ -225,5 +225,38 @@ void MatrixMult_Strassen(const int n, const vector<vector<T>> * A, const vector<
 			(*C)[i + mid][j + mid] = C_22[i][j];
 		}
 	}
+
+	MatrixRemovePadding(n, C);
 }
 
+int FindFaddingSize(const int n);
+
+template<typename T>
+void MatrixPadding(const int n, vector<vector<T>> * A)
+{
+	int i;
+	int size = FindFaddingSize(n);
+
+	if (size) return;
+
+	A->resize(size);
+	for (i = 0; i < size; i++)
+	{
+		(*A)[i].resize(size);
+	}
+
+	MatrixDisp(size, A);
+}
+
+template<typename T>
+void MatrixRemovePadding(const int n, vector<vector<T>> * A)
+{
+	int i;
+
+	A->resize(n);
+
+	for (i = 0; i < n; i++)
+	{
+		(*A)[i].resize(n);
+	}
+}

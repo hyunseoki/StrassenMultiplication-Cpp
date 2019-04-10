@@ -1,9 +1,39 @@
 #pragma once
 
-#include "Stranssen_Vector.h"
+#include "Strassen_Vector.h"
 #include <opencv2\opencv.hpp>
 #include <time.h>
 #include <chrono>
+
+void main()
+{
+	const int N = 5;
+	vector<vector<int>> A,B,C;
+	MatrixInit(N, &A);
+	MatrixInitEye(N, &B);
+	MatrixInit(N, &C);
+
+	MatrixDisp(N, &A);
+	//MatrixDisp(N, &B);
+
+	//MatrixSum(N, &A, &B, &C);
+	//MatrixDisp(N, &C);
+
+	//MatrixSubs(N, &A, &B, &C);
+	//MatrixDisp(N, &C);
+
+	cout << "Standard Mult\n";
+	MatrixMult_Standard(N, &A, &B, &C);
+	MatrixDisp(N, &C);
+
+	cout << "OpenMP Mult\n";
+	MatrixMult_OpenMP(N, &A, &B, &C);
+	MatrixDisp(N, &C);
+
+	cout << "Strassen Mult\n";
+	MatrixMult_Strassen(N, &A, &B, &C);
+	MatrixDisp(N, &C);
+}
 
 //using cv::Mat;
 //using std::chrono::high_resolution_clock;
@@ -88,33 +118,3 @@
 //#endif
 //	cout << "Strassen run time = " << (end - start).count() / 1000 << "micro sec.\n\n";
 //}
-
-void main()
-{
-	const int N = 256;
-	vector<vector<int>> A,B,C;
-	MatrixInit(N, &A);
-	MatrixInitEye(N, &B);
-	MatrixInit(N, &C);
-
-	MatrixDisp(N, &A);
-	//MatrixDisp(N, &B);
-
-	//MatrixSum(N, &A, &B, &C);
-	//MatrixDisp(N, &C);
-
-	//MatrixSubs(N, &A, &B, &C);
-	//MatrixDisp(N, &C);
-
-	cout << "Standard Mult\n";
-	MatrixMult_Standard(N, &A, &B, &C);
-	MatrixDisp(N, &C);
-
-	cout << "OpenMP Mult\n";
-	MatrixMult_OpenMP(N, &A, &B, &C);
-	MatrixDisp(N, &C);
-
-	cout << "Strassen Mult\n";
-	MatrixMult_Strassen(N, &A, &B, &C);
-	MatrixDisp(N, &C);
-}
