@@ -5,16 +5,19 @@
 #include <time.h>
 #include <chrono>
 
+using cv::Mat;
+using std::chrono::high_resolution_clock;
+
 void main()
 {
-	const int N = 200;
-	vector<vector<int>> A,B,C;
+	const int N = 6;
+	vector<vector<int>> A, B, C;
 	MatrixInit(N, &A);
 	MatrixInitEye(N, &B);
 	MatrixInit(N, &C);
 
 	MatrixDisp(N, &A);
-	
+
 	cout << "Standard Mult\n";
 	MatrixMult_Standard(N, &A, &B, &C);
 	MatrixDisp(N, &C);
@@ -28,18 +31,19 @@ void main()
 	MatrixDisp(N, &C);
 }
 
-//using cv::Mat;
-//using std::chrono::high_resolution_clock;
-//
 //void main()
 //{
+//	const int N = 5;
+//
 //	static_assert(1 < N && N < 257, "Matrix dimension must be greater than 1 and less than 257");
 //
 //	Mat cv_A(N, N, CV_32F);
 //	Mat cv_B(N, N, CV_32F);
 //
-//	float A[N][N], B[N][N], C[N][N];
-//	
+//	vector<vector<float>> A(N, vector<float>(N));
+//	vector<vector<float>> B(N, vector<float>(N));
+//	vector<vector<float>> C(N, vector<float>(N));
+//
 //	srand(time(NULL));
 //
 //	float ranN1, ranN2;
@@ -76,11 +80,11 @@ void main()
 //	//cout << "opencv run time = " << clock() - cstart << "mm sec.\n\n";
 //
 //	start = high_resolution_clock::now();
-//	MatrixMult_Standard<float>(N, A, B, C);
+//	MatrixMult_Standard(N, &A, &B, &C);
 //	end = high_resolution_clock::now();
 //#ifdef _DEBUG
 //	cout << "(Standard) A x B  \n";
-//	MatrixDisp<float>(N, C);
+//	MatrixDisp(N, &C);
 //#endif
 //	cout << "standard run time = " << (end - start).count()/1000 << "micro sec.\n\n";
 //
@@ -89,11 +93,11 @@ void main()
 //	//cout << "standard run time = " << clock() - cstart << "mm sec.\n\n";
 //
 //	start = high_resolution_clock::now();
-//	MatrixMult_OpenMP<float>(N, A, B, C);
+//	MatrixMult_OpenMP(N, &A, &B, &C);
 //	end = high_resolution_clock::now();
 //#ifdef _DEBUG
 //	cout << "(OpenMP) A x B  \n";
-//	MatrixDisp<float>(N, C);
+//	MatrixDisp(N, &C);
 //#endif
 //	cout << "OpenMP run time = " << (end - start).count() / 1000 << "micro sec.\n\n";
 //
@@ -103,11 +107,11 @@ void main()
 //
 //
 //	start = high_resolution_clock::now();
-//	MatrixMult_Strassen<float>(N, A, B, C);
+//	MatrixMult_Strassen(N, &A, &B, &C);
 //	end = high_resolution_clock::now();
 //#ifdef _DEBUG
 //	cout << "(Strassen) A x B  \n";
-//	MatrixDisp<float>(N, C);
+//	MatrixDisp(N, &C);
 //#endif
 //	cout << "Strassen run time = " << (end - start).count() / 1000 << "micro sec.\n\n";
 //}
