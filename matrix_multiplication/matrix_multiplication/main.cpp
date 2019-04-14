@@ -10,13 +10,12 @@ using std::chrono::high_resolution_clock;
 
 void main()
 {
-	const int N = 6;
-	vector<vector<int>> A, B, C;
+	const int N = 5;
+	vector<vector<int>> A, B, C, D;
 	MatrixInit(N, &A);
 	MatrixInitEye(N, &B);
-	MatrixInit(N, &C);
-
-	MatrixDisp(N, &A);
+	MatrixInitZero(N, &C);
+	MatrixInitZero(N, &D);
 
 	cout << "Standard Mult\n";
 	MatrixMult_Standard(N, &A, &B, &C);
@@ -29,6 +28,10 @@ void main()
 	cout << "Strassen Mult\n";
 	MatrixMult_Strassen(N, &A, &B, &C);
 	MatrixDisp(N, &C);
+
+	cout << "Strassen Mult Optimization\n";
+	MatrixMult_Optimized_Strassen(N, &A, &B, &D);
+	MatrixDisp(N, &D);
 }
 
 //void main()
