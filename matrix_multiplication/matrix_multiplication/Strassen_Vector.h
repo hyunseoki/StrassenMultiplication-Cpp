@@ -2,9 +2,11 @@
 #include <iostream>
 #include <vector>
 #include <omp.h>
+#include <thread>
 
 using std::cout;
 using std::vector;
+using std::thread;
 
 struct MatrixType
 {
@@ -15,6 +17,24 @@ const MatrixType M_11 = { 0, 0 };
 const MatrixType M_12 = { 0, 1 };
 const MatrixType M_21 = { 1, 0 };
 const MatrixType M_22 = { 1, 1 };
+
+template<typename T>
+void MatrixTrans(const int n, vector<vector<T>> * A, vector<vector<T>> * B)
+{
+#pragma omp parallel
+	{
+		int i, j
+		#pragma omp for
+		for (i = 0; i<n; i++)
+		{
+			for (j = 0; j<n; j++)
+			{
+				B[j*n + i] = A[i*n + j];
+			}
+		}
+	}
+}
+
 
 template<typename T>
 void MatrixInit(const int n, vector<vector<T>> * A)
@@ -56,7 +76,6 @@ void MatrixInitEye(const int n, vector<vector<T>> * A)
 template<typename T>
 void MatrixInitZero(const int n, vector<vector<T>> * A)
 {
-
 	(*A).resize(n);
 	for (int i = 0; i < n; i++)
 	{
@@ -114,23 +133,51 @@ void MatrixMult_Standard(const int n, const vector<vector<T>> * A, const vector<
 template<typename T>
 void MatrixMult_OpenMP(const int n, const vector<vector<T>> * A, const vector<vector<T>> * B, vector<vector<T>> * C)
 {
-	T dot_product;
-	int i, j, k;
-	for (i = 0; i < n; i++)
+	//vector<vector<T>> B_transp(n, vector<T>(n));
+	//MatrixTrans(n, B, B_transp);
+
+	//#pragma omp parallel
+	//{
+	//	int i, j, k;
+	//	#pragma omp for
+	//	for (i = 0; i < n; i++)
+	//	{
+	//		for (j = 0; j < n; j++)
+	//		{
+	//			for (k = 0; k < n; k++)
+	//			{
+	//				if (k)
+	//				{
+	//					(*C)[i][j] += (*A)[i][k] * (*B)[k][j];
+	//				}
+	//				else
+	//					(*C)[i][j] = (*A)[i][k] * (*B)[k][j];
+	//			}
+	//		}
+	//	}
+	//}
+
+	#pragma omp parallel
 	{
-		for (j = 0; j < n; j++)
+		int i, j, k;
+		#pragma omp for
+		for (i = 0; i < n; i++)
 		{
-			for (k = 0; k < n; k++)
+			for (j = 0; j < n; j++)
 			{
-				if (k)
+				for (k = 0; k < n; k++)
 				{
-					(*C)[i][j] += (*A)[i][k] * (*B)[k][j];
+					if (k)
+					{
+						(*C)[i][j] += (*A)[i][k] * (*B)[k][j];
+					}
+					else
+						(*C)[i][j] = (*A)[i][k] * (*B)[k][j];
 				}
-				else
-					(*C)[i][j] = (*A)[i][k] * (*B)[k][j];
 			}
 		}
 	}
+
 }
 
 template<typename T>
@@ -161,14 +208,20 @@ void MatrixPartialMult_OpenMP(const int n, const vector<vector<T>> * A, const Ma
 template<typename T>
 void MatrixSum(const int n, const vector<vector<T>> * A, const vector<vector<T>> * B, vector<vector<T>> * C)
 {
-	int i, j;
-	for (i = 0; i < n; i++)
+	#pragma omp parallel
 	{
-		for (j = 0; j < n; j++)
+		int i, j;
+		#pragma omp for
+		for (i = 0; i < n; i++)
 		{
-			(*C)[i][j] = (*A)[i][j] + (*B)[i][j];
+			for (j = 0; j < n; j++)
+			{
+				(*C)[i][j] = (*A)[i][j] + (*B)[i][j];
+			}
 		}
 	}
+
+	// threshold - 50
 }
 
 template<typename T>
@@ -189,12 +242,16 @@ void MatrixPartialSum(const int n, const vector<vector<T>> * A, const MatrixType
 template<typename T>
 void MatrixSubs(const int n, const vector<vector<T>> * A, const vector<vector<T>> * B, vector<vector<T>> * C)
 {
-	int i, j;
-	for (i = 0; i < n; i++)
+	#pragma omp parallel
 	{
-		for (j = 0; j < n; j++)
+		int i, j;
+		#pragma omp for
+		for (i = 0; i < n; i++)
 		{
-			(*C)[i][j] = (*A)[i][j] - (*B)[i][j];
+			for (j = 0; j < n; j++)
+			{
+				(*C)[i][j] = (*A)[i][j] - (*B)[i][j];
+			}
 		}
 	}
 }
@@ -219,11 +276,11 @@ void MatrixMult_Strassen(const int n, vector<vector<T>> * A, vector<vector<T>> *
 {
 	if (n == 2)
 	{
-		MatrixMult_OpenMP(n, A, B, C);
+		MatrixMult_Standard(n, A, B, C);
 		return;
 	}
 
-	int i, j, median, paddingsize(FindFaddingSize(n));
+	int i, j, median, paddingsize(FindPaddingSize(n));
 
 	if (paddingsize)
 	{
@@ -243,77 +300,112 @@ void MatrixMult_Strassen(const int n, vector<vector<T>> * A, vector<vector<T>> *
 		temp_A(median, vector<T>(median)), temp_B(median, vector<T>(median));
 
 	// Matrix Division
-	for (i = 0; i < median; i++)
+	//#pragma omp parallel
 	{
-		for (j = 0; j < median; j++)
+		//#pragma omp for (i,j)
+		for (i = 0; i < median; i++)
 		{
-			A_11[i][j] = (*A)[i][j];
-			A_12[i][j] = (*A)[i][j + median];
-			A_21[i][j] = (*A)[i + median][j];
-			A_22[i][j] = (*A)[i + median][j + median];
+			for (j = 0; j < median; j++)
+			{
+				A_11[i][j] = (*A)[i][j];
+				A_12[i][j] = (*A)[i][j + median];
+				A_21[i][j] = (*A)[i + median][j];
+				A_22[i][j] = (*A)[i + median][j + median];
 
-			B_11[i][j] = (*B)[i][j];
-			B_12[i][j] = (*B)[i][j + median];
-			B_21[i][j] = (*B)[i + median][j];
-			B_22[i][j] = (*B)[i + median][j + median];
+				B_11[i][j] = (*B)[i][j];
+				B_12[i][j] = (*B)[i][j + median];
+				B_21[i][j] = (*B)[i + median][j];
+				B_22[i][j] = (*B)[i + median][j + median];
+			}
 		}
 	}
 
-		// M1 = (A11 + A22) * (B11 + B22)
-		MatrixSum(median, &A_11, &A_22, &temp_A);
-		MatrixSum(median, &B_11, &B_22, &temp_B);
-		MatrixMult_Strassen(median, &temp_A, &temp_B, &M_1);
 
-		// M2 = (A21 + A22) * B11
-		MatrixSum(median, &A_21, &A_22, &temp_A);
-		MatrixMult_Strassen(median, &temp_A, &B_11, &M_2);
+	thread t[15];
 
-		// M3 = A11 * (B12-B22)
-		MatrixSubs(median, &B_12, &B_22, &temp_B);
-		MatrixMult_Strassen(median, &A_11, &temp_B, &M_3);
+	// M1 = (A11 + A22) * (B11 + B22)
+	t[1] = thread(MatrixSum<T>, median, &A_11, &A_22, &temp_A);
+	t[2] = thread(MatrixSum<T>, median, &B_11, &B_22, &temp_B);
+	t[1].join(), t[2].join();
+	MatrixMult_Strassen(median, &temp_A, &temp_B, &M_1);
+	//MatrixSum(median, &A_11, &A_22, &temp_A);
+	//MatrixSum(median, &B_11, &B_22, &temp_B);
+		
 
-		// M4 = A22 * (B21 - B11)
-		MatrixSubs(median, &B_21, &B_11, &temp_B);
-		MatrixMult_Strassen(median, &A_22, &temp_B, &M_4);
+	// M2 = (A21 + A22) * B11
+	t[3] = thread(MatrixSum<T>, median, &A_21, &A_22, &temp_A);
+	//MatrixSum(median, &A_21, &A_22, &temp_A);
+	t[3].join();
+	MatrixMult_Strassen(median, &temp_A, &B_11, &M_2);
 
-		// M5 = (A11 + A12) * B22
-		MatrixSum(median, &A_11, &A_12, &temp_A);
-		MatrixMult_Strassen(median, &temp_A, &B_22, &M_5);
+	// M3 = A11 * (B12-B22)
+	t[4] = thread(MatrixSubs<T>, median, &B_12, &B_22, &temp_B);
+	//MatrixSubs(median, &B_12, &B_22, &temp_B);
+	t[4].join();
+	MatrixMult_Strassen(median, &A_11, &temp_B, &M_3);
 
-		// M6 = (A21 - A11) * (B11 + B12)
-		MatrixSubs(median, &A_21, &A_11, &temp_A);
-		MatrixSum(median, &B_11, &B_12, &temp_B);
-		MatrixMult_Strassen(median, &temp_A, &temp_B, &M_6);
+	// M4 = A22 * (B21 - B11)
+	t[5] = thread(MatrixSubs<T>, median, &B_21, &B_11, &temp_B);
+	t[5].join();
+	//MatrixSubs(median, &B_21, &B_11, &temp_B);
+	MatrixMult_Strassen(median, &A_22, &temp_B, &M_4);
 
-		// M7 = (A12 - A22) * (B21 + B22)
-		MatrixSubs(median, &A_12, &A_22, &temp_A);
-		MatrixSum(median, &B_21, &B_22, &temp_B);
-		MatrixMult_Strassen(median, &temp_A, &temp_B, &M_7);
+	// M5 = (A11 + A12) * B22
+	t[6] = thread(MatrixSum<T>, median, &A_11, &A_12, &temp_A);
+	t[6].join();
+	//MatrixSum(median, &A_11, &A_12, &temp_A);
+	MatrixMult_Strassen(median, &temp_A, &B_22, &M_5);
 
-		// C11 = M1 + M4 - M5 + M7
-		MatrixSum(median, &M_1, &M_4, &temp_A);
-		MatrixSubs(median, &temp_A, &M_5, &temp_B);
-		MatrixSum(median, &temp_B, &M_7, &C_11);
+	// M6 = (A21 - A11) * (B11 + B12)
+	t[7] = thread(MatrixSubs<T>, median, &A_21, &A_11, &temp_A);
+	t[8] = thread(MatrixSum<T>, median, &B_11, &B_12, &temp_B);
+	t[7].join(), t[8].join();
+	/*MatrixSubs(median, &A_21, &A_11, &temp_A);
+	MatrixSum(median, &B_11, &B_12, &temp_B);*/
+	MatrixMult_Strassen(median, &temp_A, &temp_B, &M_6);
 
-		// C12 = M3 + M5
-		MatrixSum(median, &M_3, &M_5, &C_12);
+	// M7 = (A12 - A22) * (B21 + B22)
+	t[9] = thread(MatrixSubs<T>, median, &A_12, &A_22, &temp_A);
+	t[10] = thread(MatrixSum<T>, median, &B_21, &B_22, &temp_B);
+	t[9].join(), t[10].join();
+	//MatrixSubs(median, &A_12, &A_22, &temp_A);
+	//MatrixSum(median, &B_21, &B_22, &temp_B);
+	MatrixMult_Strassen(median, &temp_A, &temp_B, &M_7);
 
-		// C21 = M2 + M4
-		MatrixSum(median, &M_2, &M_4, &C_21);
+	// C11 = M1 + M4 - M5 + M7
+	t[11] = thread(MatrixSum<T>, median, &M_1, &M_4, &temp_A);
+	t[12] = thread(MatrixSubs<T>, median, &temp_A, &M_5, &temp_B);
+	t[11].join(), t[12].join();
+	//MatrixSum(median, &M_1, &M_4, &temp_A);
+	//MatrixSubs(median, &temp_A, &M_5, &temp_B);
+	MatrixSum(median, &temp_B, &M_7, &C_11);
 
-		// C22 = M1 - M2 + M3 + M6
-		MatrixSum(median, &M_1, &M_3, &temp_A);
-		MatrixSubs(median, &temp_A, &M_2, &temp_B);
-		MatrixSum(median, &temp_B, &M_6, &C_22);
+	// C12 = M3 + M5
+	t[13] = thread(MatrixSum<T>, median, &M_3, &M_5, &C_12);
+	//MatrixSum(median, &M_3, &M_5, &C_12);
 
-	for (i = 0; i < median; i++)
+	// C21 = M2 + M4
+	t[14] = thread(MatrixSum<T>, median, &M_2, &M_4, &C_21);
+	//MatrixSum(median, &M_2, &M_4, &C_21);
+	t[13].join(), t[14].join();
+
+	// C22 = M1 - M2 + M3 + M6
+	MatrixSum(median, &M_1, &M_3, &temp_A);
+	MatrixSubs(median, &temp_A, &M_2, &temp_B);
+	MatrixSum(median, &temp_B, &M_6, &C_22);
+
+	//#pragma omp parallel
 	{
-		for (j = 0; j < median; j++)
+		//#pragma omp for
+		for (i = 0; i < median; i++)
 		{
-			(*C)[i][j] = C_11[i][j];
-			(*C)[i][j + median] = C_12[i][j];
-			(*C)[i + median][j] = C_21[i][j];
-			(*C)[i + median][j + median] = C_22[i][j];
+			for (j = 0; j < median; j++)
+			{
+				(*C)[i][j] = C_11[i][j];
+				(*C)[i][j + median] = C_12[i][j];
+				(*C)[i + median][j] = C_21[i][j];
+				(*C)[i + median][j + median] = C_22[i][j];
+			}
 		}
 	}
 
@@ -329,7 +421,7 @@ void MatrixMult_Optimized_Strassen(const int n, vector<vector<T>> * A, vector<ve
 		return;
 	}
 
-	int i, j, median, paddingsize(FindFaddingSize(n));
+	int i, j, median, paddingsize(FindPaddingSize(n));
 
 	if (paddingsize)
 	{
@@ -372,7 +464,7 @@ void MatrixMult_Optimized_Strassen(const int n, vector<vector<T>> * A, vector<ve
 	// M2 = (A21 + A22) * B11 
 	MatrixPartialSum(median, A, M_21, A, M_22, &temp_AA, M_11);
 	MatrixMult_Standard(median, &temp_AA, &B_11, &temp_CC);
-	MatrixMult_Optimized_Strassen(median, &temp_AA, &B_11, &temp_CC);
+	//MatrixMult_Optimized_Strassen(median, &temp_AA, &B_11, &temp_CC);
 
 	MatrixPartialSum(median, &temp_CC, M_11, C, M_21, C, M_21);
 	MatrixPartialSubs(median, C, M_22, &temp_CC, M_11, C, M_22);
@@ -387,7 +479,7 @@ void MatrixMult_Optimized_Strassen(const int n, vector<vector<T>> * A, vector<ve
 
 	// M4 = A22 * (B21 - B11)
 	MatrixPartialSubs(median, B, M_21, B, M_11, &temp_AA, M_11);
-	MatrixMult_Standard(median, &A_22, &temp_AA, &temp_BB);
+	//MatrixMult_Standard(median, &A_22, &temp_AA, &temp_BB);
 	MatrixMult_Optimized_Strassen(median, &A_22, &temp_AA, &temp_BB);
 
 	MatrixPartialSum(median, &temp_BB, M_11, C, M_11, C, M_11);
@@ -395,8 +487,8 @@ void MatrixMult_Optimized_Strassen(const int n, vector<vector<T>> * A, vector<ve
 
 	// M5 = (A11 + A12) * B22
 	MatrixPartialSum(median, A, M_11, A, M_12, &temp_AA, M_11);
-	MatrixMult_Standard(median, &temp_AA, &B_22, &temp_BB);
-	//MatrixMult_Optimized_Strassen(median, &temp_AA, &B_22, &temp_BB);
+	//MatrixMult_Standard(median, &temp_AA, &B_22, &temp_BB);
+	MatrixMult_Optimized_Strassen(median, &temp_AA, &B_22, &temp_BB);
 
 	MatrixPartialSubs(median, C, M_11, &temp_BB, M_11, C, M_11);
 	MatrixPartialSum(median, C, M_12, &temp_BB, M_11, C, M_12);
@@ -419,8 +511,7 @@ void MatrixMult_Optimized_Strassen(const int n, vector<vector<T>> * A, vector<ve
 	if (!paddingsize) MatrixRemovePadding(n, C);
 }
 
-
-int FindFaddingSize(const int n);
+int FindPaddingSize(const int n);
 
 template<typename T>
 void MatrixPadding(const int n, vector<vector<T>> * A, vector<vector<T>> * B, vector<vector<T>> * C)

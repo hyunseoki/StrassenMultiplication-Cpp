@@ -1,6 +1,6 @@
 #include "Strassen_Vector.h"
 
-int FindFaddingSize(const int n)
+int FindPaddingSize(const int n)
 {
 	if (!(n & (n - 1))) return 0;
 	else if (n < 4)     return 4;

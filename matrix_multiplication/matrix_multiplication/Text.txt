@@ -1,0 +1,11 @@
+Reference
+[1] Github 
+    : https://github.com/hyunseoki
+[2] Strassen Algorithim Description
+    : https://en.wikipedia.org/wiki/Strassen_algorithm
+[3] Question about OpenMP Application to MatrixMultiplication
+    : https://stackoverflow.com/questions/22634121/openmp-c-matrix-multiplication-run-slower-in-parallel
+[4] Strassen Ref#1
+    : https://github.com/wcochran/strassen_multiplier/blob/master/mm.c
+[5] Strassen Ref#2
+	: https://stackoverflow.com/questions/4304600/matrix-multiplication-strassen-vs-standard
