@@ -1,13 +1,17 @@
 #pragma once
 
-#include "Strassen_Vector.h"
-#include <opencv2\opencv.hpp>
+//#include "Strassen_Vector.h"
+//#include <opencv2\opencv.hpp>
+#include <iostream>
 #include <time.h>
 #include <chrono>
+#include <typeinfo>       
 
-using cv::Mat;
+//using cv::Mat;
 using std::chrono::high_resolution_clock;
+using std::cout;
 
+const int N = 4;
 //void main()
 //{
 //	const int N = 5;
@@ -120,36 +124,47 @@ using std::chrono::high_resolution_clock;
 //	cout << "Strassen run time = " << (end - start).count() / 1000 << "micro sec.\n\n";
 //}
 
-const int N = 4;
-
 template<typename T>
-void MatrixSum(int n, T *A[], T *B[], T *C[])
+void MatrixSum(const int n, const T *A, const T *B, T *C)
 {
 	int i, j;
 	for (i = 0; i < n; i++)
 	{
 		for (j = 0; j < n; j++)
 		{
-			C[i][j] = A[i][j] + B[i][j];
+			C[i*n + j] = A[i*n + j] + B[i*n + j];
 		}
 	}
 }
 
 template<typename T>
-void MatrixSubs(int n, T *A[], T *B[], T *C[])
+void MatrixPartialSum(const int n, const int Apitch, const int Bpitch, const int Cpitch, const T *A, const T *B, T *C)
 {
 	int i, j;
 	for (i = 0; i < n; i++)
 	{
 		for (j = 0; j < n; j++)
 		{
-			C[i][j] = A[i][j] - B[i][j];
+			C[i*Cpitch + j] = A[i*Apitch + j] + B[i*Bpitch + j];
 		}
 	}
 }
 
 template<typename T>
-void MatrixMult(int n, T *A[], T *B[], T *C[])
+void MatrixSubs(const int n, const T *A, const T *B, T *C)
+{
+	int i, j;
+	for (i = 0; i < n; i++)
+	{
+		for (j = 0; j < n; j++)
+		{
+			C[i*n + j] = A[i*n + j] - B[i*n + j];
+		}
+	}
+}
+
+template<typename T>
+void MatrixMult(const int n, const T *A, const T *B, T *C)
 {
 	int i, j, k;
 	for (i = 0; i < n; i++)
@@ -160,70 +175,112 @@ void MatrixMult(int n, T *A[], T *B[], T *C[])
 			{
 				if (k)
 				{
-					C[i][j] += A[i][k] * B[k][j];
+					C[i*n + j] += A[i*n + k] * B[k*n + j];
 				}
 				else
-					C[i][j] = A[i][k] * B[k][j];
+					C[i*n + j] = A[i*n + k] * B[k*n + j];
 			}
 		}
 	}
 }
 
 template<typename T>
-void MatrixMult_Strassen(int n, T *A[], T *B[], T *C[])
+void MatrixMultStrassen(const int n, T *A/*, T *B, T *C*/)
 {
+	//if (N <= 2)
+	//{
+	//	MatrixMult(n, A, B, C);
+	//	return;
+	//}
+
 	int m = n / 2;
 
 	T *A11 = A;
-	T *A12 = A + n;
-	T *A21 = A + n * 2;
-	T *A22 = A + n * 2;
+	//MatrixPartialPrint(m, m, A11);
+	T *A12 = A + m;
+	//MatrixPartialPrint(m, m, A12);
+	T *A21 = A + 2 * m * m;
+	//MatrixPartialPrint(m, m, A21);
+	T *A22 = A + 2 * m * m + m;
+	//MatrixPartialPrint(m, m, A22);
 
-	T *B11;
-	T *B12;
-	T *B21;
-	T *B22;
+	T** temp_AA = new T*[m];
+	for (int i = 0; i < m; ++i)
+	{
+		temp_AA[i] = new T[m];
+	}
+	
+	MatrixPartialSum(n, m, m, m, A11, A12, *temp_AA);
+	MatrixPrint(m, *temp_AA);
+
+	for (int i = 0; i < m; i++)
+	{
+		delete[] temp_AA[i];
+	}
+
+	//delete[] temp_AA;
+
+	//double *P[7];   // allocate temp matrices off heap
+	//const int sz = n*n * sizeof(double);
+	//for (int i = 0; i < 7; i++)
+	//	P[i] = (double *)malloc(sz);
+	//double *T = (double *)malloc(sz);
+	//double *U = (double *)malloc(sz);
+
+	//T * temp11 = new T;
+
+
+	//T *B11 = B;
+	//T *B12 = B + n;
+	//T *B21 = B + 2 * n;
+	//T *B22 = B;
+
+	//MatrixSum(m, A21, A22, AA);
+
+	//MatrixPrint(m, A21);
+	//MatrixPrint(m, A22);
+	//T *A12 = A + n;
+	//T *A21 = A + n * 2;
+	//T *A22 = A + n * 2;
+
+	//T *B11;
+	//T *B12;
+	//T *B21;
+	//T *B22;
+
 
 }
 
 template<typename T>
-void MatrixPrint(int n, T *A[])
+void CreateRandomMatrix(const int n, T *A)
 {
 	int i, j;
 
-	cout << "[";
 	for (i = 0; i < n; i++)
 	{
 		for (j = 0; j < n; j++)
 		{
-			cout << A[i][j];
-			if (j != n - 1) { cout << ", "; }
+			A[i*n + j] = (T)(rand()) * 10 / 32767;
 		}
-		if (i != n - 1) { cout << ";\n "; }
 	}
-	cout << "]\n\n";
 }
 
 template<typename T>
-void CreateMatrix(int n, T *A[])
+void CreateZeroMatrix(const int n, T *A)
 {
 	int i, j;
-	int *temp = new int[n][n];
 
 	for (i = 0; i < n; i++)
 	{
 		for (j = 0; j < n; j++)
 		{
-			temp[i][j] = (T)(rand()) * 10 / 32767;
+			A[i][j] = (T)(rand()) * 10 / 32767;
 		}
 	}
-	A = temp;
-
-	delete[] temp;
 }
 
 template<typename T>
-void CreateEyeMatrix(int n, T *A[])
+void CreateEyeMatrix(const int n, T *A)
 {
 	int i, j;
 
@@ -233,48 +290,74 @@ void CreateEyeMatrix(int n, T *A[])
 		{
 			if (i == j)
 			{
-				A[i][j] = (T)1;
+				A[i*n + j] = (T)1;
 			}
 			else
 			{
-				A[i][j] = (T)0;
-			}	
+				A[i*n + j] = (T)0;
+			}
 		}
 	}
 }
 
+template<typename T>
+void MatrixPrint(const int n, const T *A)
+{
+	int i, j;
+
+	cout << "[";
+	for (i = 0; i < n; i++)
+	{
+		for (j = 0; j < n; j++)
+		{
+			cout << A[i*n + j];
+			if (j != n - 1) { cout << ", "; }
+		}
+		if (i != n - 1) { cout << ";\n "; }
+	}
+	cout << "]\n\n";
+}
+
+template<typename T>
+void MatrixPartialPrint(const int n, const int pitch, const T *A)
+{
+	int i, j;
+
+	cout << "[";
+	for (i = 0; i < n; i++)
+	{
+		for (j = 0; j < n; j++)
+		{
+			cout << A[i*n*pitch + j];
+			if (j != n - 1) { cout << ", "; }
+		}
+		if (i != n - 1) { cout << ";\n "; }
+	}
+
+	cout << "]\n\n";
+}
+
 void main()
 {
-	int Aarray1[N] = { 1,2,3,1 };
-	int Aarray2[N] = { -1,1,2,3 };
-	int Aarray3[N] = { 0,4,5,-3 };
-	int Aarray4[N] = { -1,1,2,3 };
-	int * A[N] = { Aarray1, Aarray2, Aarray3, Aarray4 };
+	int MatA[N][N] = { 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16 };
+	int MatB[N][N] = { 0 };
+	int MatC[N][N] = { 0 };
 
+	int * A = MatA[0];
+	int * B = MatB[0];
+	int * C = MatC[0];
+
+	//CreateEyeMatrix(N, A);
 	MatrixPrint(N, A);
 
-	int Barray1[N] = { 1,0,0,0 };
-	int Barray2[N] = { 0,1,0,0 };
-	int Barray3[N] = { 0,0,1,0 };
-	int Barray4[N] = { 0,0,0,1 };
-	int *B[N] = { Barray1, Barray2, Barray3, Barray4 };
+	//CreateRandomMatrix(N, B);
+	//MatrixPrint(N, B);
 
-	MatrixPrint(N, B);
+	MatrixMultStrassen(N, A);
 
-	int Carray1[N] = { 0,0,0,0 };
-	int Carray2[N] = { 0,0,0,0 };
-	int Carray3[N] = { 0,0,0,0 };
-	int Carray4[N] = { 0,0,0,0 };
-	int *C[N] = { Carray1, Carray2, Carray3, Carray4 };
+	//MatrixMult_Strassen(N, A, B, C);
 
-	MatrixSum(N, A, B, C);
-	MatrixPrint(N, C);
+	//MatrixPrint(N, B);
 
-	//int *A[N];
-	//CreateMatrix<int>(N, A);
-	//MatrixPrint<int>(N, A);
-
-/*	CreateEyeMatrix(N, B);
-	MatrixPrint(N, B)*/;
 
 }

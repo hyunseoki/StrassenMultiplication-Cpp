@@ -10,4 +10,4 @@ Reference
 [5] Strassen Ref#2
 	: https://stackoverflow.com/questions/4304600/matrix-multiplication-strassen-vs-standard
 [6] Array and Pointer
-    : http://www.parkjonghyuk.net/lecture/programming1/lecturenote/chap06-6.pdf
+    : http://0www.parkjonghyuk.net/lecture/programming1/lecturenote/chap06-6.pdf
