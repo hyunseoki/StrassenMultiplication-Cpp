@@ -35,7 +35,6 @@ void MatrixTrans(const int n, vector<vector<T>> * A, vector<vector<T>> * B)
 	}
 }
 
-
 template<typename T>
 void MatrixInit(const int n, vector<vector<T>> * A)
 {

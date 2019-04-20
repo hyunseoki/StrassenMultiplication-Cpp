@@ -8,13 +8,14 @@ namespace ArrayMult
 
 }
 
-const int N = 4;
+const int N = 16;
 using std::cout;
 
 typedef struct MatrixOffset
 {
 	int i, j;
 }Offset;
+
 
 template<typename T>
 void MatrixPrint(const int n, const T A[][N])
@@ -210,7 +211,6 @@ void MatrixSum_Partial(const int n, const Offset A_Offset, const Offset B_Offset
 	}
 }
 
-
 template<typename T>
 void MatrixSum_Partial(const int n, const Offset A_Offset, const Offset B_Offset, const T A[][N], const T B[][N], T **C)
 {
@@ -309,80 +309,72 @@ void MatrixMult_Strassen(const int n, const T A[][N], const T B[][N], T C[][N])
 		temp3[i] = new T[m];
 	}
 
-	Offset A11 = { 0, 0 };
-	Offset A12 = { 0, m };
-	Offset A21 = { m, 0 };
-	Offset A22 = { m, m };
-	Offset &B11 = A11;
-	Offset &B12 = A12;
-	Offset &B21 = A21;
-	Offset &B22 = A22;
-	Offset &C11 = A11;
-	Offset &C12 = A12;
-	Offset &C21 = A21;
-	Offset &C22 = A22;
-	Offset &ZERO = A11;
+	Offset M11 = { 0, 0 };
+	Offset M12 = { 0, m };
+	Offset M21 = { m, 0 };
+	Offset M22 = { m, m };
+	Offset &ZERO = M11;
 
-	// C11 = M1 +           M4 - M5      + M7
-	// C12 =           M3      + M5
-	// C21 =      M2      + M4
-	// C22 = M1 - M2 + M3           + M6
+	// M11 = M1 +           M4 - M5      + M7
+	// M12 =           M3      + M5
+	// M21 =      M2      + M4
+	// M22 = M1 - M2 + M3           + M6
 
-	// M1 = (A11 + A22) * (B11 + B22)
-	MatrixSum_Partial(m, A11, A22, A, A, temp1);
-	MatrixSum_Partial(m, B11, B22, B, B, temp2);
+	// M1 = (M11 + M22) * (M11 + M22)
+	MatrixSum_Partial(m, M11, M22, A, A, temp1);
+	MatrixSum_Partial(m, M11, M22, B, B, temp2);
 
 	MatrixMult_Standard(m, temp1, temp2, temp3);
 
-	MatrixSum_Partial(m, C11, ZERO, C11, C, temp3, C);
-	MatrixSum_Partial(m, C22, ZERO, C22, C, temp3, C);
+	MatrixSum_Partial(m, M11, ZERO, M11, C, temp3, C);
+	MatrixSum_Partial(m, M22, ZERO, M22, C, temp3, C);
 
-	// M2 = (A21 + A22) * B11 
-	MatrixSum_Partial(m, A21, A22, A, A, temp1);
-	MatrixMult_Partial(m, ZERO, B11, ZERO, temp1, B, temp3);
+	// M2 = (M21 + M22) * M11 
+	MatrixSum_Partial(m, M21, M22, A, A, temp1);
+	MatrixMult_Partial(m, ZERO, M11, ZERO, temp1, B, temp3);
 
-	MatrixSum_Partial(m, C21, ZERO, C21, C, temp3, C);
-	MatrixSubs_Partial(m, C22, ZERO, C22, C, temp3, C);
+	MatrixSum_Partial(m, M21, ZERO, M21, C, temp3, C);
+	MatrixSubs_Partial(m, M22, ZERO, M22, C, temp3, C);
 
-	// M3 = A11 * (B12-B22)
-	MatrixSubs_Partial(m, B12, B22, B, B, temp1);
+	// M3 = M11 * (M12-M22)
+	MatrixSubs_Partial(m, M12, M22, B, B, temp1);
 	
-	MatrixMult_Partial(m, A11, ZERO, ZERO, A, temp1, temp3);
+	MatrixMult_Partial(m, M11, ZERO, ZERO, A, temp1, temp3);
 
-	MatrixSum_Partial(m, C12, ZERO, C12, C, temp3, C);
-	MatrixSum_Partial(m, C22, ZERO, C22, C, temp3, C);
+	MatrixSum_Partial(m, M12, ZERO, M12, C, temp3, C);
+	MatrixSum_Partial(m, M22, ZERO, M22, C, temp3, C);
 
-	// M4 = A22 * (B21 - B11)
-	MatrixSubs_Partial(m, B21, B11, B, B, temp1);
+	// M4 = M22 * (M21 - M11)
+	MatrixSubs_Partial(m, M21, M11, B, B, temp1);
 
-	MatrixMult_Partial(m, A22, ZERO, ZERO, A, temp1, temp3);
+	MatrixMult_Partial(m, M22, ZERO, ZERO, A, temp1, temp3);
 
-	MatrixSum_Partial(m, C11, ZERO, C11, C, temp3, C);
-	MatrixSum_Partial(m, C21, ZERO, C21, C, temp3, C);
+	MatrixSum_Partial(m, M11, ZERO, M11, C, temp3, C);
+	MatrixSum_Partial(m, M21, ZERO, M21, C, temp3, C);
 
-	// M5 = (A11 + A12) * B22
-	MatrixSum_Partial(m, A11, A12, A, A, temp1);
+	// M5 = (M11 + M12) * M22
+	MatrixSum_Partial(m, M11, M12, A, A, temp1);
 
-	MatrixMult_Partial(m, ZERO, B22, ZERO, temp1, B, temp3);
+	MatrixMult_Partial(m, ZERO, M22, ZERO, temp1, B, temp3);
 
-	MatrixSubs_Partial(m, C11, ZERO, C11, C, temp3, C);
-	MatrixSum_Partial(m, C12, ZERO, C12, C, temp3, C);
+	MatrixSubs_Partial(m, M11, ZERO, M11, C, temp3, C);
+	MatrixSum_Partial(m, M12, ZERO, M12, C, temp3, C);
 
-	// M6 = (A21 - A11) * (B11 + B12)
-	MatrixSubs_Partial(m, A21, A11, A, A, temp1);
-	MatrixSum_Partial(m, B11, B12, B, B, temp2);
-
-	MatrixMult_Partial(m, ZERO, ZERO, ZERO, temp1, temp2, temp3);
-
-	MatrixSum_Partial(m, C22, ZERO, C22, C, temp3, C);
-
-	// M7 = (A12 - A22) * (B21 + B22)
-	MatrixSubs_Partial(m, A12, A22, A, A, temp1);
-	MatrixSum_Partial(m, B21, B22, B, B, temp2);
+	// M6 = (M21 - M11) * (M11 + M12)
+	MatrixSubs_Partial(m, M21, M11, A, A, temp1);
+	MatrixSum_Partial(m, M11, M12, B, B, temp2);
 
 	MatrixMult_Partial(m, ZERO, ZERO, ZERO, temp1, temp2, temp3);
 
-	MatrixSum_Partial(m, C11, ZERO, C11, C, temp3, C);
+	MatrixSum_Partial(m, M22, ZERO, M22, C, temp3, C);
+
+	// M7 = (M12 - M22) * (M21 + M22)
+	MatrixSubs_Partial(m, M12, M22, A, A, temp1);
+	MatrixSum_Partial(m, M21, M22, B, B, temp2);
+
+	MatrixMult_Partial(m, ZERO, ZERO, ZERO, temp1, temp2, temp3);
+
+	MatrixSum_Partial(m, M11, ZERO, M11, C, temp3, C);
 
 	for (i = 0; i < m; i++)
 	{

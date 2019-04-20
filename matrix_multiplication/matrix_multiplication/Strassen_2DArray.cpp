@@ -25,6 +25,9 @@ void main()
 		}
 	}
 
+	int ** test = A;
+	MatrixPrint(N, test);
+
 	//MatrixPrint(N, A);
 	//MatrixPrint(N, B);
 
@@ -41,13 +44,12 @@ void main()
 	//MyTime.Start();
 	MatrixMult_Standard(N, A, B, C1);
 	//MyTime.End("Standard Multi");
-	MatrixPrint(N, C1);
+	//MatrixPrint(N, C1);
 
 	//MyTime.Start();
 	MatrixMult_Strassen(N, A, B, C2);
 	//MyTime.End("Strassen Multi");
-	MatrixPrint(N, C2);
+	//MatrixPrint(N, C2);
 	
-
-	//MatrixCheck(N, C1, C2);
+	MatrixCheck(N, C1, C2);
 }
