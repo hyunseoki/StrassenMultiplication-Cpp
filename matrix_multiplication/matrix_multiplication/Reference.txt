@@ -1,6 +1,7 @@
 Reference
-[1] Github 
+[1] Github / HashCode
     : https://github.com/hyunseoki
+	: https://hashcode.co.kr/users/34129/hyunseoki
 [2] Strassen Algorithim Description
     : https://en.wikipedia.org/wiki/Strassen_algorithm
 [3] Question about OpenMP Application to MatrixMultiplication

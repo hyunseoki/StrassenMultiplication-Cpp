@@ -93,7 +93,7 @@ void MatrixInitZero(const int n, vector<vector<T>> * A)
 }
 
 template<typename T>
-void MatrixDisp(const int n, const vector<vector<T>> * A)
+void MatrixPrint(const int n, const vector<vector<T>> * A)
 {
 	int i, j;
 	cout << "[";
