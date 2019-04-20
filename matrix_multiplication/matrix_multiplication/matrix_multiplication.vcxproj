@@ -164,9 +164,11 @@
   <ItemGroup>
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Strassen_Vector.cpp" />
+    <ClCompile Include="TimeCheck.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Strassen_Vector.h" />
+    <ClInclude Include="TimeCheck.h" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="Ref.txt" />

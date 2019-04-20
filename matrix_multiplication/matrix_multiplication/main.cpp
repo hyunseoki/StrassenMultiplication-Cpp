@@ -209,14 +209,21 @@ void MatrixMultStrassen(const int n, T *A/*, T *B, T *C*/)
 	{
 		temp_AA[i] = new T[m];
 	}
-	
+
+	T** temp_BB = new T*[m];
+	for (int i = 0; i < m; ++i)
+	{
+		temp_BB[i] = new T[m];
+	}
+
+	MatrixPrint(m, *temp_AA);
 	MatrixPartialSum(n, m, m, m, A11, A12, *temp_AA);
 	MatrixPrint(m, *temp_AA);
 
-	for (int i = 0; i < m; i++)
-	{
-		delete[] temp_AA[i];
-	}
+	//for (int i = 0; i < m; i++)
+	//{
+	//	delete[] temp_AA[i];
+	//}
 
 	//delete[] temp_AA;
 
