@@ -96,18 +96,21 @@ void MatrixSum(const int n, const vector<vector<T>> * A, const vector<vector<T>>
 			}
 		}
 	}
-
-	// threshold - 50
 }
 
 template<typename T>
 void MatrixSum_Partial(const int n, const Offset A_Offset, const Offset B_Offset, const Offset C_Offset, vector<vector<T>> * A, vector<vector<T>> * B, vector<vector<T>> * C)
 {
-	for (int i = 0; i < n; i++)
+	#pragma omp parallel
 	{
-		for (int j = 0; j < n; j++)
+		int i, j;
+		#pragma omp for
+		for (i = 0; i < n; i++)
 		{
-			(*C)[i + C_Offset.i][j + C_Offset.j] = (*A)[i + A_Offset.i][j + A_Offset.j] + (*B)[i + B_Offset.i][j + B_Offset.j];
+			for (j = 0; j < n; j++)
+			{
+				(*C)[i + C_Offset.i][j + C_Offset.j] = (*A)[i + A_Offset.i][j + A_Offset.j] + (*B)[i + B_Offset.i][j + B_Offset.j];
+			}
 		}
 	}
 }
@@ -132,11 +135,17 @@ void MatrixSubs(const int n, const vector<vector<T>> * A, const vector<vector<T>
 template<typename T>
 void MatrixSubs_Partial(const int n, const Offset A_Offset, const Offset B_Offset, const Offset C_Offset, const vector<vector<T>> * A, const vector<vector<T>> * B, vector<vector<T>> * C)
 {
-	for (int i = 0; i < n; i++)
+
+	#pragma omp parallel
 	{
-		for (int j = 0; j < n; j++)
+		int i, j;
+		#pragma omp for
+		for (i = 0; i < n; i++)
 		{
-			(*C)[i + C_Offset.i][j + C_Offset.j] = (*A)[i + A_Offset.i][j + A_Offset.j] - (*B)[i + B_Offset.i][j + B_Offset.j];
+			for (j = 0; j < n; j++)
+			{
+				(*C)[i + C_Offset.i][j + C_Offset.j] = (*A)[i + A_Offset.i][j + A_Offset.j] - (*B)[i + B_Offset.i][j + B_Offset.j];
+			}
 		}
 	}
 }
@@ -165,10 +174,10 @@ void MatrixMult_Standard(const int n, const vector<vector<T>> * A, const vector<
 template<typename T>
 void MatrixMult_OpenMP(const int n, const vector<vector<T>> * A, const vector<vector<T>> * B, vector<vector<T>> * C)
 {
-#pragma omp parallel
+	#pragma omp parallel
 	{
 		int i, j, k;
-#pragma omp for
+		#pragma omp for
 		for (i = 0; i < n; i++)
 		{
 			for (j = 0; j < n; j++)
@@ -185,25 +194,27 @@ void MatrixMult_OpenMP(const int n, const vector<vector<T>> * A, const vector<ve
 			}
 		}
 	}
-
 }
 
 template<typename T>
 void MatrixMult_Partial(const int n, const Offset A_Offset, const Offset B_Offset, const Offset C_Offset, const vector<vector<T>> * A, const vector<vector<T>> * B, vector<vector<T>> * C)
 {
-	for (int i = 0; i < n; i++)
+	#pragma omp parallel
 	{
-		for (int j = 0; j < n; j++)
+		#pragma omp for
+		for (int i = 0; i < n; i++)
 		{
-			int sum = 0;
-			for (int k = 0; k < n; k++)
+			for (int j = 0; j < n; j++)
 			{
-				if (k)
+				for (int k = 0; k < n; k++)
 				{
-					(*C)[i + C_Offset.i][j + C_Offset.j] += (*A)[i + A_Offset.i][k + A_Offset.j] * (*B)[k + B_Offset.i][j + B_Offset.j];
+					if (k)
+					{
+						(*C)[i + C_Offset.i][j + C_Offset.j] += (*A)[i + A_Offset.i][k + A_Offset.j] * (*B)[k + B_Offset.i][j + B_Offset.j];
+					}
+					else
+						(*C)[i + C_Offset.i][j + C_Offset.j] = (*A)[i + A_Offset.i][k + A_Offset.j] * (*B)[k + B_Offset.i][j + B_Offset.j];
 				}
-				else
-					(*C)[i + C_Offset.i][j + C_Offset.j] = (*A)[i + A_Offset.i][k + A_Offset.j] * (*B)[k + B_Offset.i][j + B_Offset.j];
 			}
 		}
 	}
@@ -220,12 +231,15 @@ void MatrixPadding(const int n, vector<vector<T>> * A, vector<vector<T>> * B, ve
 	B->resize(n);
 	C->resize(n);
 
-#pragma omp parallel for private(i)
-	for (i = 0; i < n; i++)
+	#pragma omp parallel
 	{
-		(*A)[i].resize(n);
-		(*B)[i].resize(n);
-		(*C)[i].resize(n);
+		#pragma omp for
+		for (i = 0; i < n; i++)
+		{
+			(*A)[i].resize(n);
+			(*B)[i].resize(n);
+			(*C)[i].resize(n);
+		}
 	}
 }
 
@@ -236,10 +250,13 @@ void MatrixRemovePadding(const int n, vector<vector<T>> * A)
 
 	A->resize(n);
 
-#pragma omp parallel for private(i)
-	for (i = 0; i < n; i++)
+	#pragma omp parallel
 	{
-		(*A)[i].resize(n);
+		#pragma omp for
+		for (i = 0; i < n; i++)
+		{
+			(*A)[i].resize(n);
+		}
 	}
 }
 
@@ -254,24 +271,24 @@ void MatrixCheck(const int n, vector<vector<T>> * A, vector<vector<T>> * B)
 		{
 			if ((*A)[i][j] != (*B)[i][j])
 			{
-				cout << " not same\n";
+				cout << "Matrix Size is " << n << ", not same\n\n";
 				return;
 			}
 		}
 	}
-	cout << "same\n";
+	cout << "Matrix Size is " << n << ", same\n\n";
 }
 
 template<typename T>
 void MatrixMult_Strassen(const int n, const Offset A_Offset, const Offset B_Offset, const Offset C_Offset, vector<vector<T>> * A, vector<vector<T>> * B, vector<vector<T>> * C)
 {
-	if (n == 2)
+	if (n <= 64)
 	{
 		MatrixMult_Partial(n, A_Offset, B_Offset, C_Offset, A, B, C);
 		return;
 	}
 
-	int i, j, m, paddingsize(FindPaddingSize(n));
+	int m, paddingsize(FindPaddingSize(n));
 
 	if (paddingsize)
 	{
@@ -303,6 +320,7 @@ void MatrixMult_Strassen(const int n, const Offset A_Offset, const Offset B_Offs
 	vector<vector<T>> temp1(m, vector<T>(m, 0));
 	vector<vector<T>> temp2(m, vector<T>(m, 0));
 	vector<vector<T>> temp3(m, vector<T>(m, 0));
+	vector<vector<T>> ZEROVEC(m, vector<T>(m, 0));
 
 	// C11 = M1 +           M4 - M5      + M7
 	// C12 =           M3      + M5
@@ -313,14 +331,6 @@ void MatrixMult_Strassen(const int n, const Offset A_Offset, const Offset B_Offs
 	MatrixSum_Partial(m, A11, A22, ZERO, A, A, &temp1);
 	MatrixSum_Partial(m, B11, B22, ZERO, B, B, &temp2);
 
-	for (int i = 0; i < m; i++)
-	{
-		for (int j = 0; j < m; j++)
-		{
-			temp3[i][j] = 0;
-		}
-	}
-
 	MatrixMult_Strassen(m, ZERO, ZERO, ZERO, &temp1, &temp2, &temp3);
 
 	MatrixSum_Partial(m, C11, ZERO, C11, C, &temp3, C);
@@ -329,13 +339,7 @@ void MatrixMult_Strassen(const int n, const Offset A_Offset, const Offset B_Offs
 	// M2 := (A21 + A22) * B11
 	MatrixSum_Partial(m, A21, A22, ZERO, A, A, &temp1);
 
-	for (int i = 0; i < m; i++)
-	{
-		for (int j = 0; j < m; j++)
-		{
-			temp3[i][j] = 0;
-		}
-	}
+	temp3 = ZEROVEC;
 
 	MatrixMult_Strassen(m, ZERO, B11, ZERO, &temp1, B, &temp3);
 
@@ -345,13 +349,7 @@ void MatrixMult_Strassen(const int n, const Offset A_Offset, const Offset B_Offs
 	// M3 := A11 * (B12-B22)
 	MatrixSubs_Partial(m, B12, B22, ZERO, B, B, &temp1);
 
-	for (int i = 0; i < m; i++)
-	{
-		for (int j = 0; j < m; j++)
-		{
-			temp3[i][j] = 0;
-		}
-	}
+	temp3 = ZEROVEC;
 
 	MatrixMult_Strassen(m, A11, ZERO, ZERO, A, &temp1, &temp3);
 
@@ -361,13 +359,8 @@ void MatrixMult_Strassen(const int n, const Offset A_Offset, const Offset B_Offs
 	// M4 := A22 * (B21 - B11)
 	MatrixSubs_Partial(m, B21, B11, ZERO, B, B, &temp1);
 
-	for (int i = 0; i < m; i++)
-	{
-		for (int j = 0; j < m; j++)
-		{
-			temp3[i][j] = 0;
-		}
-	}
+	temp3 = ZEROVEC;
+
 	MatrixMult_Strassen(m, A22, ZERO, ZERO, A, &temp1, &temp3);
 
 	MatrixSum_Partial(m, C11, ZERO, C11, C, &temp3, C);
@@ -376,13 +369,7 @@ void MatrixMult_Strassen(const int n, const Offset A_Offset, const Offset B_Offs
 	// M5 := (A11 + A12) * B22
 	MatrixSum_Partial(m, A11, A12, ZERO, A, A, &temp1);
 
-	for (int i = 0; i < m; i++)
-	{
-		for (int j = 0; j < m; j++)
-		{
-			temp3[i][j] = 0;
-		}
-	}
+	temp3 = ZEROVEC;
 
 	MatrixMult_Strassen(m, ZERO, B22, ZERO, &temp1, B, &temp3);
 
@@ -393,13 +380,7 @@ void MatrixMult_Strassen(const int n, const Offset A_Offset, const Offset B_Offs
 	MatrixSubs_Partial(m, A21, A11, ZERO, A, A, &temp1);
 	MatrixSum_Partial(m, B11, B12, ZERO, B, B, &temp2);
 
-	for (int i = 0; i < m; i++)
-	{
-		for (int j = 0; j < m; j++)
-		{
-			temp3[i][j] = 0;
-		}
-	}
+	temp3 = ZEROVEC;
 
 	MatrixMult_Strassen(m, ZERO, ZERO, ZERO, &temp1, &temp2, &temp3);
 
@@ -409,13 +390,7 @@ void MatrixMult_Strassen(const int n, const Offset A_Offset, const Offset B_Offs
 	MatrixSubs_Partial(m, A12, A22, ZERO, A, A, &temp1);
 	MatrixSum_Partial(m, B21, B22, ZERO, B, B, &temp2);
 	
-	for (int i = 0; i < m; i++)
-	{
-		for (int j = 0; j < m; j++)
-		{
-			temp3[i][j] = 0;
-		}
-	}
+	temp3 = ZEROVEC;
 
 	MatrixMult_Strassen(m, ZERO, ZERO, ZERO, &temp1, &temp2, &temp3);
 

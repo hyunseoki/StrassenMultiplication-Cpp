@@ -3,10 +3,19 @@
 
 TimeCheck MyCheck;
 
-void main()
+void test_Strassen(const int N);
+
+//void main()
+//{
+//	int i;
+//	for (i = 510; i < 515; i++)
+//	{
+//		test_Strassen(i);
+//	}
+//}
+
+void test_Strassen(int N)
 {
-	const int N = 540;
-	
 	vector<vector<int>> A(N, vector<int>(N, 0));
 	vector<vector<int>> B(N, vector<int>(N, 0));
 	vector<vector<int>> C1(N, vector<int>(N, 0));
@@ -18,15 +27,22 @@ void main()
 	
 	Offset ZERO = { 0,0 };
 
-	//MyCheck.Start();
+	MyCheck.Start();
 	MatrixMult_Standard(N, &A, &B, &C1);
-	//MyCheck.End("standard");
-	//MatrixPrint(N, &C1);
+	MyCheck.End("Standard");
 
-	//MyCheck.Start();
+	MyCheck.Start();
+	MatrixMult_OpenMP(N, &A, &B, &C1);
+	MyCheck.End("OpenMP  ");
+
+	MyCheck.Start();
 	MatrixMult_Strassen(N, ZERO, ZERO,ZERO, &A, &B, &C2);
-	//MyCheck.End("Strassen");
-	//MatrixPrint(N, &C2);
+	MyCheck.End("Strassen");
+
+#ifdef DEBUG
+	MatrixPrint(N, &C1);
+	MatrixPrint(N, &C2);
+#endif // DEBUG
 
 	MatrixCheck(N, &C2, &C1);
 

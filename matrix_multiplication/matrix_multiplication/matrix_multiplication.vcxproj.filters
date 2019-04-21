@@ -27,12 +27,18 @@
     <ClCompile Include="DataStructureComparision.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
+    <ClCompile Include="WriteCSV.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Strassen_Vector.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
     <ClInclude Include="TimeCheck.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="WriteCSV.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
   </ItemGroup>

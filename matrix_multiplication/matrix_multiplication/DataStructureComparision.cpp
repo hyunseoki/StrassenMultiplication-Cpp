@@ -5,7 +5,7 @@ TimeCheck TimeTest_MyTime;
 
 using std::vector;
 
-void Test(const int N);
+void test_DataStructure(const int N);
 
 //void main()
 //{
@@ -16,7 +16,7 @@ void Test(const int N);
 //	}
 //}
 
-void Test(const int N)
+void test_DataStructure(const int N)
 {
 	cout << "\n" << N << "\n";
 

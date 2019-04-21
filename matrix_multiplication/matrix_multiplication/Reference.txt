@@ -2,6 +2,7 @@ Reference
 [1] Github / HashCode
     : https://github.com/hyunseoki
 	: https://hashcode.co.kr/users/34129/hyunseoki
+
 [2] Strassen Algorithim Description
     : https://en.wikipedia.org/wiki/Strassen_algorithm
 [3] Question about OpenMP Application to MatrixMultiplication
@@ -12,3 +13,5 @@ Reference
 	: https://stackoverflow.com/questions/4304600/matrix-multiplication-strassen-vs-standard
 [6] Array and Pointer
     : http://0www.parkjonghyuk.net/lecture/programming1/lecturenote/chap06-6.pdf
+[7] Optimization
+    : https://gist.github.com/nadavrot/5b35d44e8ba3dd718e595e40184d03f0#why-is-this-program-slow
