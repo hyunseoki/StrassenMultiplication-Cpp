@@ -1,10 +1,22 @@
 #pragma once
 #include <fstream>
 
-std::ofstream MyFile;
+class WriteCSV
+{
+public:
+	WriteCSV();
+	~WriteCSV();
+	void makeFile(const char * filename);
+	void write(const char * s);
+	void WriteCSV::write(const int s);
+	void WriteCSV::write(const float s);
+	void WriteCSV::changeRow();
+	void closeFile();
 
-void makeFile(const char * filename);
+private:
+	std::ofstream m_sStream;
+};
 
-void writeCSV(const char * s);
 
-void closeFile();
+
+

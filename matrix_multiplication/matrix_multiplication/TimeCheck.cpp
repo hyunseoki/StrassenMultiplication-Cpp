@@ -19,6 +19,12 @@ void TimeCheck::End()
 	Print();
 }
 
+// Return (mmsec)
+float TimeCheck::GetTime()
+{
+	return (m_End - m_Start).count() / 1000;
+}
+
 void TimeCheck::End(const char * s)
 {
 	m_End = high_resolution_clock::now();

@@ -1,18 +1,39 @@
 #include "WriteCSV.h"
 
-using namespace std;
-
-void makeFile(const char * filename = "log.csv")
+WriteCSV::WriteCSV()
 {
-	MyFile.open(filename);
 }
 
-void writeCSV(const char * s)
+WriteCSV::~WriteCSV()
 {
-	MyFile<< s << ",";
 }
 
-void closeFile()
+void WriteCSV::makeFile(const char * filename = "log.csv")
 {
-	MyFile.close();
+	m_sStream.open(filename);
+}
+
+void WriteCSV::write(const char * s)
+{
+	m_sStream << s << ",";
+}
+
+void WriteCSV::write(const int s)
+{
+	m_sStream << s << ",";
+}
+
+void WriteCSV::write(const float s)
+{
+	m_sStream << s << ",";
+}
+
+void WriteCSV::changeRow()
+{
+	m_sStream << "\n";
+}
+
+void WriteCSV::closeFile()
+{
+	m_sStream.close();
 }

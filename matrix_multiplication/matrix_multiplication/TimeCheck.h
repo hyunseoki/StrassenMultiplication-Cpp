@@ -15,6 +15,7 @@ public:
 	~TimeCheck();
 	void Start();
 	void End();
+	float GetTime();
 	void End(const char* s);
 
 private:
