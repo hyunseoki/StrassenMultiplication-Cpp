@@ -5,30 +5,30 @@ TimeCheck MyCheck;
 
 void main()
 {
-	const int N = 8;
+	const int N = 540;
 	
 	vector<vector<int>> A(N, vector<int>(N, 0));
 	vector<vector<int>> B(N, vector<int>(N, 0));
 	vector<vector<int>> C1(N, vector<int>(N, 0));
 	vector<vector<int>> C2(N, vector<int>(N, 0));
+	vector<vector<int>> C3(4, vector<int>(4, 0));
 
 	CreateRandomMatrix(N, &A);
 	CreateEyeMatrix(N, &B);
-	//MatrixPrint(N, &A);
-	//MatrixPrint(N, &B);
-
+	
 	Offset ZERO = { 0,0 };
 
-	MyCheck.Start();
+	//MyCheck.Start();
 	MatrixMult_Standard(N, &A, &B, &C1);
-	MyCheck.End("standard");
+	//MyCheck.End("standard");
+	//MatrixPrint(N, &C1);
 
-	MyCheck.Start();
+	//MyCheck.Start();
 	MatrixMult_Strassen(N, ZERO, ZERO,ZERO, &A, &B, &C2);
-	MyCheck.End("Strassen");
+	//MyCheck.End("Strassen");
 	//MatrixPrint(N, &C2);
 
-	//MatrixCheck(N, &C2, &C1);
+	MatrixCheck(N, &C2, &C1);
 
 }
 
@@ -42,5 +42,6 @@ int FindPaddingSize(const int n)
 	else if (n < 64)    return 64;
 	else if (n < 128)   return 128;
 	else if (n < 256)   return 256;
-	else                return 512;
+	else if (n < 512)   return 512;
+	else                return 1024;
 }

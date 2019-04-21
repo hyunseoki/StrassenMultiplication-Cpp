@@ -163,13 +163,11 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp" />
-    <ClCompile Include="Strassen_2DArray.cpp" />
     <ClCompile Include="Strassen_Vector.cpp" />
     <ClCompile Include="TimeCheck.cpp" />
-    <ClCompile Include="Compare_DataStructure.cpp" />
+    <ClCompile Include="DataStructureComparision.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Strassen_2DArray.h" />
     <ClInclude Include="Strassen_Vector.h" />
     <ClInclude Include="TimeCheck.h" />
   </ItemGroup>
