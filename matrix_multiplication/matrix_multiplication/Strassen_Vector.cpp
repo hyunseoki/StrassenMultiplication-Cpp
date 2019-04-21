@@ -1,4 +1,36 @@
 #include "Strassen_Vector.h"
+#include "TimeCheck.h"
+
+TimeCheck MyCheck;
+
+void main()
+{
+	const int N = 8;
+	
+	vector<vector<int>> A(N, vector<int>(N, 0));
+	vector<vector<int>> B(N, vector<int>(N, 0));
+	vector<vector<int>> C1(N, vector<int>(N, 0));
+	vector<vector<int>> C2(N, vector<int>(N, 0));
+
+	CreateRandomMatrix(N, &A);
+	CreateEyeMatrix(N, &B);
+	//MatrixPrint(N, &A);
+	//MatrixPrint(N, &B);
+
+	Offset ZERO = { 0,0 };
+
+	MyCheck.Start();
+	MatrixMult_Standard(N, &A, &B, &C1);
+	MyCheck.End("standard");
+
+	MyCheck.Start();
+	MatrixMult_Strassen(N, ZERO, ZERO,ZERO, &A, &B, &C2);
+	MyCheck.End("Strassen");
+	//MatrixPrint(N, &C2);
+
+	//MatrixCheck(N, &C2, &C1);
+
+}
 
 int FindPaddingSize(const int n)
 {
@@ -12,4 +44,3 @@ int FindPaddingSize(const int n)
 	else if (n < 256)   return 256;
 	else                return 512;
 }
-

@@ -27,6 +27,9 @@
     <ClCompile Include="Strassen_2DArray.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
+    <ClCompile Include="Compare_DataStructure.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Strassen_Vector.h">

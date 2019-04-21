@@ -166,6 +166,7 @@
     <ClCompile Include="Strassen_2DArray.cpp" />
     <ClCompile Include="Strassen_Vector.cpp" />
     <ClCompile Include="TimeCheck.cpp" />
+    <ClCompile Include="Compare_DataStructure.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Strassen_2DArray.h" />
