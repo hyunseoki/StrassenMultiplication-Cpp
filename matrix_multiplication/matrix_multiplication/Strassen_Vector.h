@@ -282,7 +282,7 @@ void MatrixCheck(const int n, vector<vector<T>> * A, vector<vector<T>> * B)
 template<typename T>
 void MatrixMult_Strassen(const int n, const Offset A_Offset, const Offset B_Offset, const Offset C_Offset, vector<vector<T>> * A, vector<vector<T>> * B, vector<vector<T>> * C)
 {
-	if (n <= 64)
+	if (n == 4)
 	{
 		MatrixMult_Partial(n, A_Offset, B_Offset, C_Offset, A, B, C);
 		return;
@@ -314,7 +314,7 @@ void MatrixMult_Strassen(const int n, const Offset A_Offset, const Offset B_Offs
 	Offset C12 = { C_Offset.i + 0, C_Offset.j + m };
 	Offset C21 = { C_Offset.i + m, C_Offset.j + 0 };
 	Offset C22 = { C_Offset.i + m, C_Offset.j + m };
-	
+
 	Offset ZERO = { 0, 0 };
 
 	vector<vector<T>> temp1(m, vector<T>(m, 0));
@@ -389,7 +389,252 @@ void MatrixMult_Strassen(const int n, const Offset A_Offset, const Offset B_Offs
 	// M7 := (A12 - A22) * (B21 + B22)
 	MatrixSubs_Partial(m, A12, A22, ZERO, A, A, &temp1);
 	MatrixSum_Partial(m, B21, B22, ZERO, B, B, &temp2);
-	
+
+	temp3 = ZEROVEC;
+
+	MatrixMult_Strassen(m, ZERO, ZERO, ZERO, &temp1, &temp2, &temp3);
+
+	MatrixSum_Partial(m, C11, ZERO, C11, C, &temp3, C);
+
+	if (!paddingsize) MatrixRemovePadding(n, C);
+}
+
+template<typename T>
+void MatrixMult_Strassen(const int k, const int n, const Offset A_Offset, const Offset B_Offset, const Offset C_Offset, vector<vector<T>> * A, vector<vector<T>> * B, vector<vector<T>> * C)
+{
+	if (A_Offset.i > k || A_Offset.j > k || B_Offset.i > k || A_Offset.i > k)
+	{
+		return;
+	}
+
+	if (n <= 16)
+	{
+		MatrixMult_Partial(n, A_Offset, B_Offset, C_Offset, A, B, C);
+		return;
+	}
+
+	int m, paddingsize(FindPaddingSize(n));
+
+	if (paddingsize)
+	{
+		m = paddingsize / 2;
+		MatrixPadding(paddingsize, A, B, C);
+	}
+	else
+	{
+		m = n / 2;
+	}
+
+	Offset A11 = { A_Offset.i + 0 ,A_Offset.j + 0 };
+	Offset A12 = { A_Offset.i + 0, A_Offset.j + m };
+	Offset A21 = { A_Offset.i + m, A_Offset.j + 0 };
+	Offset A22 = { A_Offset.i + m, A_Offset.j + m };
+
+	Offset B11 = { B_Offset.i + 0 ,B_Offset.j + 0 };
+	Offset B12 = { B_Offset.i + 0, B_Offset.j + m };
+	Offset B21 = { B_Offset.i + m, B_Offset.j + 0 };
+	Offset B22 = { B_Offset.i + m, B_Offset.j + m };
+
+	Offset C11 = { C_Offset.i + 0 ,C_Offset.j + 0 };
+	Offset C12 = { C_Offset.i + 0, C_Offset.j + m };
+	Offset C21 = { C_Offset.i + m, C_Offset.j + 0 };
+	Offset C22 = { C_Offset.i + m, C_Offset.j + m };
+
+	Offset ZERO = { 0, 0 };
+
+	vector<vector<T>> temp1(m, vector<T>(m, 0));
+	vector<vector<T>> temp2(m, vector<T>(m, 0));
+	vector<vector<T>> temp3(m, vector<T>(m, 0));
+	vector<vector<T>> ZEROVEC(m, vector<T>(m, 0));
+
+	// C11 = M1 +           M4 - M5      + M7
+	// C12 =           M3      + M5
+	// C21 =      M2      + M4
+	// C22 = M1 - M2 + M3           + M6
+
+	// M1 := (A11 + A22) * (B11 + B22)
+	MatrixSum_Partial(m, A11, A22, ZERO, A, A, &temp1);
+	MatrixSum_Partial(m, B11, B22, ZERO, B, B, &temp2);
+
+	MatrixMult_Strassen(k, m, ZERO, ZERO, ZERO, &temp1, &temp2, &temp3);
+
+	MatrixSum_Partial(m, C11, ZERO, C11, C, &temp3, C);
+	MatrixSum_Partial(m, C22, ZERO, C22, C, &temp3, C);
+
+	// M2 := (A21 + A22) * B11
+	MatrixSum_Partial(m, A21, A22, ZERO, A, A, &temp1);
+
+	temp3 = ZEROVEC;
+
+	MatrixMult_Strassen(k, m, ZERO, B11, ZERO, &temp1, B, &temp3);
+
+	MatrixSum_Partial(m, C21, ZERO, C21, C, &temp3, C);
+	MatrixSubs_Partial(m, C22, ZERO, C22, C, &temp3, C);
+
+	// M3 := A11 * (B12-B22)
+	MatrixSubs_Partial(m, B12, B22, ZERO, B, B, &temp1);
+
+	temp3 = ZEROVEC;
+
+	MatrixMult_Strassen(k, m, A11, ZERO, ZERO, A, &temp1, &temp3);
+
+	MatrixSum_Partial(m, C12, ZERO, C12, C, &temp3, C);
+	MatrixSum_Partial(m, C22, ZERO, C22, C, &temp3, C);
+
+	// M4 := A22 * (B21 - B11)
+	MatrixSubs_Partial(m, B21, B11, ZERO, B, B, &temp1);
+
+	temp3 = ZEROVEC;
+
+	MatrixMult_Strassen(k, m, A22, ZERO, ZERO, A, &temp1, &temp3);
+
+	MatrixSum_Partial(m, C11, ZERO, C11, C, &temp3, C);
+	MatrixSum_Partial(m, C21, ZERO, C21, C, &temp3, C);
+
+	// M5 := (A11 + A12) * B22
+	MatrixSum_Partial(m, A11, A12, ZERO, A, A, &temp1);
+
+	temp3 = ZEROVEC;
+
+	MatrixMult_Strassen(k, m, ZERO, B22, ZERO, &temp1, B, &temp3);
+
+	MatrixSubs_Partial(m, C11, ZERO, C11, C, &temp3, C);
+	MatrixSum_Partial(m, C12, ZERO, C12, C, &temp3, C);
+
+	// M6 := (A21 - A11) * (B11 + B12)
+	MatrixSubs_Partial(m, A21, A11, ZERO, A, A, &temp1);
+	MatrixSum_Partial(m, B11, B12, ZERO, B, B, &temp2);
+
+	temp3 = ZEROVEC;
+
+	MatrixMult_Strassen(k, m, ZERO, ZERO, ZERO, &temp1, &temp2, &temp3);
+
+	MatrixSum_Partial(m, C22, ZERO, C22, C, &temp3, C);
+
+	// M7 := (A12 - A22) * (B21 + B22)
+	MatrixSubs_Partial(m, A12, A22, ZERO, A, A, &temp1);
+	MatrixSum_Partial(m, B21, B22, ZERO, B, B, &temp2);
+
+	temp3 = ZEROVEC;
+
+	MatrixMult_Strassen(k, m, ZERO, ZERO, ZERO, &temp1, &temp2, &temp3);
+
+	MatrixSum_Partial(m, C11, ZERO, C11, C, &temp3, C);
+
+	if (!paddingsize) MatrixRemovePadding(n, C);
+}
+
+template<typename T>
+void MatrixMult_StrassenThresholdTest(const int n, const int k, const Offset A_Offset, const Offset B_Offset, const Offset C_Offset, vector<vector<T>> * A, vector<vector<T>> * B, vector<vector<T>> * C)
+{
+	if (n <= k)
+	{
+		MatrixMult_Partial(n, A_Offset, B_Offset, C_Offset, A, B, C);
+		return;
+	}
+
+	int m, paddingsize(FindPaddingSize(n));
+
+	if (paddingsize)
+	{
+		m = paddingsize / 2;
+		MatrixPadding(paddingsize, A, B, C);
+	}
+	else
+	{
+		m = n / 2;
+	}
+
+	Offset A11 = { A_Offset.i + 0 ,A_Offset.j + 0 };
+	Offset A12 = { A_Offset.i + 0, A_Offset.j + m };
+	Offset A21 = { A_Offset.i + m, A_Offset.j + 0 };
+	Offset A22 = { A_Offset.i + m, A_Offset.j + m };
+
+	Offset B11 = { B_Offset.i + 0 ,B_Offset.j + 0 };
+	Offset B12 = { B_Offset.i + 0, B_Offset.j + m };
+	Offset B21 = { B_Offset.i + m, B_Offset.j + 0 };
+	Offset B22 = { B_Offset.i + m, B_Offset.j + m };
+
+	Offset C11 = { C_Offset.i + 0 ,C_Offset.j + 0 };
+	Offset C12 = { C_Offset.i + 0, C_Offset.j + m };
+	Offset C21 = { C_Offset.i + m, C_Offset.j + 0 };
+	Offset C22 = { C_Offset.i + m, C_Offset.j + m };
+
+	Offset ZERO = { 0, 0 };
+
+	vector<vector<T>> temp1(m, vector<T>(m, 0));
+	vector<vector<T>> temp2(m, vector<T>(m, 0));
+	vector<vector<T>> temp3(m, vector<T>(m, 0));
+	vector<vector<T>> ZEROVEC(m, vector<T>(m, 0));
+
+	// C11 = M1 +           M4 - M5      + M7
+	// C12 =           M3      + M5
+	// C21 =      M2      + M4
+	// C22 = M1 - M2 + M3           + M6
+
+	// M1 := (A11 + A22) * (B11 + B22)
+	MatrixSum_Partial(m, A11, A22, ZERO, A, A, &temp1);
+	MatrixSum_Partial(m, B11, B22, ZERO, B, B, &temp2);
+
+	MatrixMult_Strassen(m, ZERO, ZERO, ZERO, &temp1, &temp2, &temp3);
+
+	MatrixSum_Partial(m, C11, ZERO, C11, C, &temp3, C);
+	MatrixSum_Partial(m, C22, ZERO, C22, C, &temp3, C);
+
+	// M2 := (A21 + A22) * B11
+	MatrixSum_Partial(m, A21, A22, ZERO, A, A, &temp1);
+
+	temp3 = ZEROVEC;
+
+	MatrixMult_Strassen(m, ZERO, B11, ZERO, &temp1, B, &temp3);
+
+	MatrixSum_Partial(m, C21, ZERO, C21, C, &temp3, C);
+	MatrixSubs_Partial(m, C22, ZERO, C22, C, &temp3, C);
+
+	// M3 := A11 * (B12-B22)
+	MatrixSubs_Partial(m, B12, B22, ZERO, B, B, &temp1);
+
+	temp3 = ZEROVEC;
+
+	MatrixMult_Strassen(m, A11, ZERO, ZERO, A, &temp1, &temp3);
+
+	MatrixSum_Partial(m, C12, ZERO, C12, C, &temp3, C);
+	MatrixSum_Partial(m, C22, ZERO, C22, C, &temp3, C);
+
+	// M4 := A22 * (B21 - B11)
+	MatrixSubs_Partial(m, B21, B11, ZERO, B, B, &temp1);
+
+	temp3 = ZEROVEC;
+
+	MatrixMult_Strassen(m, A22, ZERO, ZERO, A, &temp1, &temp3);
+
+	MatrixSum_Partial(m, C11, ZERO, C11, C, &temp3, C);
+	MatrixSum_Partial(m, C21, ZERO, C21, C, &temp3, C);
+
+	// M5 := (A11 + A12) * B22
+	MatrixSum_Partial(m, A11, A12, ZERO, A, A, &temp1);
+
+	temp3 = ZEROVEC;
+
+	MatrixMult_Strassen(m, ZERO, B22, ZERO, &temp1, B, &temp3);
+
+	MatrixSubs_Partial(m, C11, ZERO, C11, C, &temp3, C);
+	MatrixSum_Partial(m, C12, ZERO, C12, C, &temp3, C);
+
+	// M6 := (A21 - A11) * (B11 + B12)
+	MatrixSubs_Partial(m, A21, A11, ZERO, A, A, &temp1);
+	MatrixSum_Partial(m, B11, B12, ZERO, B, B, &temp2);
+
+	temp3 = ZEROVEC;
+
+	MatrixMult_Strassen(m, ZERO, ZERO, ZERO, &temp1, &temp2, &temp3);
+
+	MatrixSum_Partial(m, C22, ZERO, C22, C, &temp3, C);
+
+	// M7 := (A12 - A22) * (B21 + B22)
+	MatrixSubs_Partial(m, A12, A22, ZERO, A, A, &temp1);
+	MatrixSum_Partial(m, B21, B22, ZERO, B, B, &temp2);
+
 	temp3 = ZEROVEC;
 
 	MatrixMult_Strassen(m, ZERO, ZERO, ZERO, &temp1, &temp2, &temp3);

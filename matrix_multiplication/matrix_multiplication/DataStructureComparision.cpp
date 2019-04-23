@@ -2,33 +2,33 @@
 #include "TimeCheck.h"
 #include "WriteCSV.h"
 
-TimeCheck TimeTest_MyTime;
-WriteCSV MyFile;
+TimeCheck DataTest_MyTime;
+WriteCSV DataTest_MyFile;
 
 using std::vector;
 
 void test_DataStructure(const int N);
 
-void main()
-{
-	MyFile.makeFile("DataStructure.csv");
-	MyFile.write("Size of Matrix");
-	MyFile.write("Dynamic Single Array : +");
-	MyFile.write("Dynamic Double Array : +");
-	MyFile.write("Vector : +");
-	MyFile.write("Dynamic Single Array : x");
-	MyFile.write("Dynamic Double Array : x");
-	MyFile.write("Vector : x");
-	MyFile.changeRow();
-
-	int i;
-	for (i = 200; i < 500; i++)
-	{
-		test_DataStructure(i);
-	}
-
-	MyFile.closeFile();
-}
+//void main()
+//{
+//	DataTest_MyFile.makeFile("DataStructure.csv");
+//	DataTest_MyFile.write("Size of Matrix");
+//	DataTest_MyFile.write("Dynamic Single Array : +");
+//	DataTest_MyFile.write("Dynamic Double Array : +");
+//	DataTest_MyFile.write("Vector : +");
+//	DataTest_MyFile.write("Dynamic Single Array : x");
+//	DataTest_MyFile.write("Dynamic Double Array : x");
+//	DataTest_MyFile.write("Vector : x");
+//	DataTest_MyFile.changeRow();
+//
+//	int i;
+//	for (i = 10; i < 501; i++)
+//	{
+//		test_DataStructure(i);
+//	}
+//
+//	DataTest_MyFile.closeFile();
+//}
 
 void test_DataStructure(const int n)
 {
@@ -81,9 +81,9 @@ void test_DataStructure(const int n)
 		}
 	}
 
-	MyFile.write(n);
+	DataTest_MyFile.write(n);
 
-	//TimeTest_MyTime.Start();
+	//DataTest_MyTime.Start();
 	//for (i = 0; i < n; i++)
 	//{
 	//	for (j = 0; j < n; j++)
@@ -91,9 +91,9 @@ void test_DataStructure(const int n)
 	//		StaticSingleArray3[i*n + j] = StaticSingleArray1[i*n + j] + StaticSingleArray2[i*n + j];
 	//	}
 	//}
-	//TimeTest_MyTime.End("Static Single Array : Sum");
+	//DataTest_MyTime.End("Static Single Array : Sum");
 
-	TimeTest_MyTime.Start();
+	DataTest_MyTime.Start();
 	for (i = 0; i < n; i++)
 	{
 		for (j = 0; j < n; j++)
@@ -101,10 +101,10 @@ void test_DataStructure(const int n)
 			DynamicSingleArray3[i*n + j] = DynamicSingleArray1[i*n + j] + DynamicSingleArray2[i*n + j];
 		}
 	}
-	TimeTest_MyTime.End("Dynamic Single Array : Sum");
-	MyFile.write(TimeTest_MyTime.GetTime());
+	DataTest_MyTime.End("Dynamic Single Array : Sum");
+	DataTest_MyFile.write(DataTest_MyTime.GetTime());
 
-	//TimeTest_MyTime.Start();
+	//DataTest_MyTime.Start();
 	//for (i = 0; i < n; i++)
 	//{
 	//	for (j = 0; j < n; j++)
@@ -112,9 +112,9 @@ void test_DataStructure(const int n)
 	//		StaticDoubleArray3[i][j] = StaticDoubleArray1[i][j] + StaticDoubleArray2[i][j];
 	//	}
 	//}
-	//TimeTest_MyTime.End("Static Double Array : Sum");
+	//DataTest_MyTime.End("Static Double Array : Sum");
 
-	TimeTest_MyTime.Start();
+	DataTest_MyTime.Start();
 	for (i = 0; i < n; i++)
 	{
 		for (j = 0; j < n; j++)
@@ -122,10 +122,10 @@ void test_DataStructure(const int n)
 			DynamicDoubleArray3[i][j] = DynamicDoubleArray1[i][j] + DynamicDoubleArray2[i][j];
 		}
 	}
-	TimeTest_MyTime.End("Dynamic Double Array : Sum");
-	MyFile.write(TimeTest_MyTime.GetTime());
+	DataTest_MyTime.End("Dynamic Double Array : Sum");
+	DataTest_MyFile.write(DataTest_MyTime.GetTime());
 
-	TimeTest_MyTime.Start();
+	DataTest_MyTime.Start();
 	for (i = 0; i < n; i++)
 	{
 		for (j = 0; j < n; j++)
@@ -133,12 +133,12 @@ void test_DataStructure(const int n)
 			Vector3[i][j] = Vector2[i][j] + Vector1[i][j];
 		}
 	}
-	TimeTest_MyTime.End("Vector : Sum");
-	MyFile.write(TimeTest_MyTime.GetTime());
+	DataTest_MyTime.End("Vector : Sum");
+	DataTest_MyFile.write(DataTest_MyTime.GetTime());
 
 	cout << "\n";
 
-	//TimeTest_MyTime.Start();
+	//DataTest_MyTime.Start();
 	//for (i = 0; i < n; i++)
 	//{
 	//	for (j = 0; j < n; j++)
@@ -153,9 +153,9 @@ void test_DataStructure(const int n)
 	//		
 	//	}
 	//}
-	//TimeTest_MyTime.End("Static Single Array : Multiplication");
+	//DataTest_MyTime.End("Static Single Array : Multiplication");
 
-	TimeTest_MyTime.Start();
+	DataTest_MyTime.Start();
 	for (i = 0; i < n; i++)
 	{
 		for (j = 0; j < n; j++)
@@ -170,10 +170,10 @@ void test_DataStructure(const int n)
 
 		}
 	}
-	TimeTest_MyTime.End("Dynamic Single Array : Multiplication");
-	MyFile.write(TimeTest_MyTime.GetTime());
+	DataTest_MyTime.End("Dynamic Single Array : Multiplication");
+	DataTest_MyFile.write(DataTest_MyTime.GetTime());
 
-	//TimeTest_MyTime.Start();
+	//DataTest_MyTime.Start();
 	//for (i = 0; i < n; i++)
 	//{
 	//	for (j = 0; j < n; j++)
@@ -189,9 +189,9 @@ void test_DataStructure(const int n)
 	//		}
 	//	}
 	//}
-	//TimeTest_MyTime.End("Static Double Array : Multiplication");
+	//DataTest_MyTime.End("Static Double Array : Multiplication");
 
-	TimeTest_MyTime.Start();
+	DataTest_MyTime.Start();
 	for (i = 0; i < n; i++)
 	{
 		for (j = 0; j < n; j++)
@@ -206,10 +206,10 @@ void test_DataStructure(const int n)
 
 		}
 	}
-	TimeTest_MyTime.End("Dynamic Double Array : Multiplication");
-	MyFile.write(TimeTest_MyTime.GetTime());
+	DataTest_MyTime.End("Dynamic Double Array : Multiplication");
+	DataTest_MyFile.write(DataTest_MyTime.GetTime());
 
-	TimeTest_MyTime.Start();
+	DataTest_MyTime.Start();
 	for (i = 0; i < n; i++)
 	{
 		for (j = 0; j < n; j++)
@@ -224,8 +224,8 @@ void test_DataStructure(const int n)
 
 		}
 	}
-	TimeTest_MyTime.End("Vector : Multiplication");
-	MyFile.write(TimeTest_MyTime.GetTime());
+	DataTest_MyTime.End("Vector : Multiplication");
+	DataTest_MyFile.write(DataTest_MyTime.GetTime());
 
-	MyFile.changeRow();
+	DataTest_MyFile.changeRow();
 }

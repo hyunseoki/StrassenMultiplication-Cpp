@@ -1,51 +1,106 @@
 #include "Strassen_Vector.h"
+#include "WriteCSV.h"
 #include "TimeCheck.h"
 
-TimeCheck MyCheck;
+TimeCheck Strassen_MyTime;
+WriteCSV Strassen_MyFile;
 
-void test_Strassen(const int N);
+void test_Threshold();
+void test_Strassen();
 
-//void main()
-//{
-//	int i;
-//	for (i = 510; i < 515; i++)
-//	{
-//		test_Strassen(i);
-//	}
-//}
-
-void test_Strassen(int N)
+void main()
 {
+	test_Threshold();
+
+}
+
+void test_Strassen()
+{
+	int N = 25;
+
 	vector<vector<int>> A(N, vector<int>(N, 0));
 	vector<vector<int>> B(N, vector<int>(N, 0));
 	vector<vector<int>> C1(N, vector<int>(N, 0));
 	vector<vector<int>> C2(N, vector<int>(N, 0));
-	vector<vector<int>> C3(4, vector<int>(4, 0));
 
 	CreateRandomMatrix(N, &A);
 	CreateEyeMatrix(N, &B);
-	
+
 	Offset ZERO = { 0,0 };
 
-	MyCheck.Start();
 	MatrixMult_Standard(N, &A, &B, &C1);
-	MyCheck.End("Standard");
+	
+	MatrixMult_Strassen(N,N, ZERO, ZERO, ZERO, &A, &B, &C2);
+	
 
-	MyCheck.Start();
-	MatrixMult_OpenMP(N, &A, &B, &C1);
-	MyCheck.End("OpenMP  ");
+	MatrixCheck(N, &C1, &C2);
 
-	MyCheck.Start();
-	MatrixMult_Strassen(N, ZERO, ZERO,ZERO, &A, &B, &C2);
-	MyCheck.End("Strassen");
+}
 
-#ifdef DEBUG
-	MatrixPrint(N, &C1);
-	MatrixPrint(N, &C2);
-#endif // DEBUG
+void test_Threshold()
+{
+	Strassen_MyFile.makeFile("StrassenTest2_20190423.csv");
+	Strassen_MyFile.write("Matrix Size");
+	Strassen_MyFile.write("Threshold(4)");
+	Strassen_MyFile.write("Threshold(8)");
+	Strassen_MyFile.write("Threshold(6)");
+	Strassen_MyFile.write("Threshold(32)");
+	Strassen_MyFile.write("Threshold(64)");
+	Strassen_MyFile.changeRow();
 
-	MatrixCheck(N, &C2, &C1);
+	Offset ZERO = { 0,0 };
 
+	int i;
+	for (i = 240; i < 600; i++)
+	{
+		vector<vector<int>> A(i, vector<int>(i, 0));
+		vector<vector<int>> B(i, vector<int>(i, 0));
+		vector<vector<int>> C(i, vector<int>(i, 0));
+
+		CreateRandomMatrix(i, &A);
+		CreateEyeMatrix(i, &B);
+
+		Strassen_MyFile.write(i);
+
+		Strassen_MyTime.Start();
+		MatrixMult_Standard(i, &A, &B, &C);
+		Strassen_MyTime.End();
+		Strassen_MyFile.write(Strassen_MyTime.GetTime());
+
+		Strassen_MyTime.Start();
+		MatrixMult_Strassen(i, i, ZERO, ZERO, ZERO, &A, &B, &C);
+		Strassen_MyTime.End();
+		Strassen_MyFile.write(Strassen_MyTime.GetTime());
+
+		//Strassen_MyTime.Start();
+		//MatrixMult_StrassenThresholdTest(i, 16, ZERO, ZERO, ZERO, &A, &B, &C);
+		//Strassen_MyTime.End();
+		//Strassen_MyFile.write(Strassen_MyTime.GetTime());
+
+		//Strassen_MyTime.Start();
+		//MatrixMult_StrassenThresholdTest(i, 8, ZERO, ZERO, ZERO, &A, &B, &C);
+		//Strassen_MyTime.End();
+		//Strassen_MyFile.write(Strassen_MyTime.GetTime());
+
+		//Strassen_MyTime.Start();
+		//MatrixMult_StrassenThresholdTest(i, 16, ZERO, ZERO, ZERO, &A, &B, &C);
+		//Strassen_MyTime.End();
+		//Strassen_MyFile.write(Strassen_MyTime.GetTime());
+
+		//Strassen_MyTime.Start();
+		//MatrixMult_StrassenThresholdTest(i, 32, ZERO, ZERO, ZERO, &A, &B, &C);
+		//Strassen_MyTime.End();
+		//Strassen_MyFile.write(Strassen_MyTime.GetTime());
+
+		//Strassen_MyTime.Start();
+		//MatrixMult_StrassenThresholdTest(i, 64, ZERO, ZERO, ZERO, &A, &B, &C);
+		//Strassen_MyTime.End();
+		//Strassen_MyFile.write(Strassen_MyTime.GetTime());
+
+		Strassen_MyFile.changeRow();
+	}
+
+	Strassen_MyFile.closeFile();
 }
 
 int FindPaddingSize(const int n)
