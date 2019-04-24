@@ -22,7 +22,7 @@ void TimeCheck::End()
 // Return (mmsec)
 float TimeCheck::GetTime()
 {
-	return (m_End - m_Start).count() / 1000;
+	return (float)(m_End - m_Start).count() / 1000.0f;
 }
 
 void TimeCheck::End(const char * s)

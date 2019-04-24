@@ -10,7 +10,7 @@ void test_Strassen();
 
 void main()
 {
-	test_Threshold();
+	test_Strassen();
 
 }
 
@@ -30,7 +30,7 @@ void test_Strassen()
 
 	MatrixMult_Standard(N, &A, &B, &C1);
 	
-	MatrixMult_Strassen(N,N, ZERO, ZERO, ZERO, &A, &B, &C2);
+	MatrixMult_Strassen_MultiThread(N,N, ZERO, ZERO, ZERO, &A, &B, &C2);
 	
 
 	MatrixCheck(N, &C1, &C2);
