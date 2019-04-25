@@ -587,8 +587,8 @@ void MatrixMult_Strassen_MultiThread(const int k, const int n, const Offset A_Of
 
 	MatrixMult_Strassen(k, m, ZERO, ZERO, ZERO, &temp1, &temp2, &temp3);
 	
-	thread t2(MatrixSum_Partial( m, C11, ZERO, C11, C, &temp3, C));
-	thread t3(MatrixSum_Partial( m, C22, ZERO, C22, C, &temp3, C));
+	thread t2(MatrixSum_Partial, m, C11, ZERO, C11, C, &temp3, C);
+	thread t3(MatrixSum_Partial, m, C22, ZERO, C22, C, &temp3, C);
 
 	// M2 := (A21 + A22) * B11
 	thread t4(MatrixSum_Partial(m, A21, A22, ZERO, A, A, &temp1));
