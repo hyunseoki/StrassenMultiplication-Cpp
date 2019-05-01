@@ -533,7 +533,7 @@ void MatrixMult_Strassen_MultiThread(const int k, const int n, const Offset A_Of
 		return;
 	}
 
-	if (n <= 16)
+	if (n <= 64)
 	{
 		MatrixMult_Partial(n, A_Offset, B_Offset, C_Offset, A, B, C);
 		return;
@@ -580,33 +580,35 @@ void MatrixMult_Strassen_MultiThread(const int k, const int n, const Offset A_Of
 
 	// M1 := (A11 + A22) * (B11 + B22)
 	//thread t0;
-	thread t0(MatrixSum_Partial,m, A11, A22, ZERO, A, A, &temp1);
-	thread t1(MatrixSum_Partial,m, B11, B22, ZERO, B, B, &temp2);
+	thread t0(MatrixSum_Partial<T>,m, A11, A22, ZERO, A, A, &temp1);
+	thread t1(MatrixSum_Partial<T>,m, B11, B22, ZERO, B, B, &temp2);
 	t0.join();
 	t1.join();
 
+
 	MatrixMult_Strassen(k, m, ZERO, ZERO, ZERO, &temp1, &temp2, &temp3);
 	
-	thread t2(MatrixSum_Partial, m, C11, ZERO, C11, C, &temp3, C);
-	thread t3(MatrixSum_Partial, m, C22, ZERO, C22, C, &temp3, C);
-
-	// M2 := (A21 + A22) * B11
-	thread t4(MatrixSum_Partial(m, A21, A22, ZERO, A, A, &temp1));
+	thread t2(MatrixSum_Partial<T>, m, C11, ZERO, C11, C, &temp3, C);
+	thread t3(MatrixSum_Partial<T>, m, C22, ZERO, C22, C, &temp3, C);
 	t2.join();
 	t3.join();
+
+	// M2 := (A21 + A22) * B11
+	thread t4(MatrixSum_Partial<T>, m, A21, A22, ZERO, A, A, &temp1);
 	t4.join();
 
 	temp3 = ZEROVEC;
 
 	MatrixMult_Strassen(k, m, ZERO, B11, ZERO, &temp1, B, &temp3);
 
-	thread t5(MatrixSum_Partial(m, C21, ZERO, C21, C, &temp3, C));
-	thread t6(MatrixSubs_Partial(m, C22, ZERO, C22, C, &temp3, C));
-
-	// M3 := A11 * (B12-B22)
-	thread t7(MatrixSubs_Partial(m, B12, B22, ZERO, B, B, &temp1));
+	thread t5(MatrixSum_Partial<T>, m, C21, ZERO, C21, C, &temp3, C);
+	thread t6(MatrixSubs_Partial<T>, m, C22, ZERO, C22, C, &temp3, C);
 	t5.join();
 	t6.join();
+
+	// M3 := A11 * (B12-B22)
+	thread t7(MatrixSubs_Partial<T>, m, B12, B22, ZERO, B, B, &temp1);
+
 	t7.join();
 
 	temp3 = ZEROVEC;
@@ -614,55 +616,55 @@ void MatrixMult_Strassen_MultiThread(const int k, const int n, const Offset A_Of
 	MatrixMult_Strassen(k, m, A11, ZERO, ZERO, A, &temp1, &temp3);
 
 
-	thread t8(MatrixSum_Partial(m, C12, ZERO, C12, C, &temp3, C));
-	thread t9(MatrixSum_Partial(m, C22, ZERO, C22, C, &temp3, C));
-
-	// M4 := A22 * (B21 - B11)
-	thread t10(MatrixSubs_Partial(m, B21, B11, ZERO, B, B, &temp1));
+	thread t8(MatrixSum_Partial<T>, m, C12, ZERO, C12, C, &temp3, C);
+	thread t9(MatrixSum_Partial<T>, m, C22, ZERO, C22, C, &temp3, C);
 	t8.join();
 	t9.join();
+
+	// M4 := A22 * (B21 - B11)
+	thread t10(MatrixSubs_Partial<T>, m, B21, B11, ZERO, B, B, &temp1);
+
 	t10.join();
 
 	temp3 = ZEROVEC;
 
 	MatrixMult_Strassen(k, m, A22, ZERO, ZERO, A, &temp1, &temp3);
 
-	thread t11(MatrixSum_Partial( m, C11, ZERO, C11, C, &temp3, C));
-	thread t12(MatrixSum_Partial(m, C21, ZERO, C21, C, &temp3, C));
-
-	// M5 := (A11 + A12) * B22
-	thread t13(MatrixSum_Partial(m, A11, A12, ZERO, A, A, &temp1));
+	thread t11(MatrixSum_Partial<T>, m, C11, ZERO, C11, C, &temp3, C);
+	thread t12(MatrixSum_Partial<T>, m, C21, ZERO, C21, C, &temp3, C);
 	t11.join();
 	t12.join();
+
+	// M5 := (A11 + A12) * B22
+	thread t13(MatrixSum_Partial<T>, m, A11, A12, ZERO, A, A, &temp1);
+
 	t13.join();
 
 	temp3 = ZEROVEC;
 
 	MatrixMult_Strassen(k, m, ZERO, B22, ZERO, &temp1, B, &temp3);
 
-	thread t14(MatrixSubs_Partial( m, C11, ZERO, C11, C, &temp3, C));
-	thread t15(MatrixSum_Partial( m, C12, ZERO, C12, C, &temp3, C));
-
-	// M6 := (A21 - A11) * (B11 + B12)
-
-	thread t16(MatrixSubs_Partial(m, A21, A11, ZERO, A, A, &temp1));
-	thread t17(MatrixSum_Partial(m, B11, B12, ZERO, B, B, &temp2));
+	thread t14(MatrixSubs_Partial<T>, m, C11, ZERO, C11, C, &temp3, C);
+	thread t15(MatrixSum_Partial<T>, m, C12, ZERO, C12, C, &temp3, C);
 	t14.join();
 	t15.join();
+	// M6 := (A21 - A11) * (B11 + B12)
+
+	thread t16(MatrixSubs_Partial<T>, m, A21, A11, ZERO, A, A, &temp1);
+	thread t17(MatrixSum_Partial<T>, m, B11, B12, ZERO, B, B, &temp2);
 	t16.join();
 	t17.join();
 
-	temp3 = ZEROVEC;
+	//temp3 = ZEROVEC;
 
 	MatrixMult_Strassen(k, m, ZERO, ZERO, ZERO, &temp1, &temp2, &temp3);
 
-	thread t18(MatrixSum_Partial(m, C22, ZERO, C22, C, &temp3, C));
-
+	thread t18(MatrixSum_Partial<T>, m, C22, ZERO, C22, C, &temp3, C);
+	t18.join();
 	// M7 := (A12 - A22) * (B21 + B22)
 
-	thread t19(MatrixSubs_Partial(m, A12, A22, ZERO, A, A, &temp1));
-	thread t20(MatrixSum_Partial(m, B21, B22, ZERO, B, B, &temp2));
-	t18.join();
+	thread t19(MatrixSubs_Partial<T>, m, A12, A22, ZERO, A, A, &temp1);
+	thread t20(MatrixSum_Partial<T>, m, B21, B22, ZERO, B, B, &temp2);
 	t19.join();
 	t20.join();
 

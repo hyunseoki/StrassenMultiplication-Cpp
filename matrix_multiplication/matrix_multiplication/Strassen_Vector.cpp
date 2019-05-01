@@ -16,24 +16,37 @@ void main()
 
 void test_Strassen()
 {
-	int N = 25;
+	int N = 256;
 
 	vector<vector<int>> A(N, vector<int>(N, 0));
 	vector<vector<int>> B(N, vector<int>(N, 0));
 	vector<vector<int>> C1(N, vector<int>(N, 0));
 	vector<vector<int>> C2(N, vector<int>(N, 0));
+	vector<vector<int>> C3(N, vector<int>(N, 0));
+	vector<vector<int>> C4(N, vector<int>(N, 0));
 
 	CreateRandomMatrix(N, &A);
 	CreateEyeMatrix(N, &B);
 
 	Offset ZERO = { 0,0 };
 
+	Strassen_MyTime.Start();
 	MatrixMult_Standard(N, &A, &B, &C1);
-	
-	MatrixMult_Strassen_MultiThread(N,N, ZERO, ZERO, ZERO, &A, &B, &C2);
-	
+	Strassen_MyTime.End();
 
-	MatrixCheck(N, &C1, &C2);
+	Strassen_MyTime.Start();
+	MatrixMult_OpenMP(N, &A, &B, &C2);
+	Strassen_MyTime.End();
+
+	Strassen_MyTime.Start();
+	MatrixMult_Strassen(N, N,ZERO, ZERO, ZERO, &A, &B, &C3);
+	Strassen_MyTime.End();
+
+	Strassen_MyTime.Start();
+	MatrixMult_Strassen_MultiThread(N,N, ZERO, ZERO, ZERO, &A, &B, &C4);
+	Strassen_MyTime.End();
+
+	MatrixCheck(N, &C3, &C4);
 
 }
 
