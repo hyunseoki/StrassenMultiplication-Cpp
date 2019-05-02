@@ -7,6 +7,7 @@
 using std::cout;
 using std::vector;
 using std::thread;
+using std::ref;
 
 typedef struct MatrixOffset
 {
@@ -194,6 +195,57 @@ void MatrixMult_OpenMP(const int n, const vector<vector<T>> * A, const vector<ve
 				}
 			}
 		}
+	}
+}
+
+template<typename T>
+void MatrixMult_Thread(const int n, const int thread_num, const int thread_idx, const vector<vector<T>> * A, const vector<vector<T>> * B, vector<vector<T>> * C)
+{
+	const int n_elements = (n * n);
+	const int n_operations = n_elements / thread_num;
+	const int rest_operations = n_elements % thread_num;
+
+	int start_op, end_op;
+
+	if (thread_idx == 0) {
+		// First thread does more job
+		start_op = n_operations * thread_idx;
+		end_op = (n_operations * (thread_idx + 1)) + rest_operations;
+	}
+	else {
+		start_op = n_operations * thread_idx + rest_operations;
+		end_op = (n_operations * (thread_idx + 1)) + rest_operations;
+	}
+
+	for (int op = start_op; op < end_op; ++op)
+	{
+		const int row = op % n;
+		const int col = op / n;
+		T r = 0;
+		for (int i = 0; i < n; ++i) {
+			const T e1 = (*A)[row][i];
+			const T e2 = (*B)[i][col];
+			r += e1 * e2;
+		}
+
+		(*C)[row][col] = r;
+	}
+}
+
+template<typename T>
+void MatrixMult_MultiThread(const int n, const vector<vector<T>> * A, const vector<vector<T>> * B, vector<vector<T>> * C)
+{
+	const int THREADS_NUM = 16;
+	thread t[THREADS_NUM];
+
+	for (int i = 0; i < THREADS_NUM; i++)
+	{
+		t[i] = thread(MatrixMult_Thread<T>, ref(n), ref(THREADS_NUM), ref(i), ref(A), ref(B), ref(C));
+	}
+
+	for (int i = 0; i < THREADS_NUM; i++)
+	{
+		t[i].join();
 	}
 }
 

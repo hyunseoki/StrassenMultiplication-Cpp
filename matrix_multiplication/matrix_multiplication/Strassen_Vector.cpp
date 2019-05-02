@@ -7,16 +7,17 @@ WriteCSV Strassen_MyFile;
 
 void test_Threshold();
 void test_Strassen();
+void test_OpenMPvsMultiThread();
 
 void main()
 {
+	//test_OpenMPvsMultiThread();
 	test_Strassen();
-
 }
 
 void test_Strassen()
 {
-	int N = 256;
+	int N = 128;
 
 	vector<vector<int>> A(N, vector<int>(N, 0));
 	vector<vector<int>> B(N, vector<int>(N, 0));
@@ -24,6 +25,7 @@ void test_Strassen()
 	vector<vector<int>> C2(N, vector<int>(N, 0));
 	vector<vector<int>> C3(N, vector<int>(N, 0));
 	vector<vector<int>> C4(N, vector<int>(N, 0));
+	vector<vector<int>> C5(N, vector<int>(N, 0));
 
 	CreateRandomMatrix(N, &A);
 	CreateEyeMatrix(N, &B);
@@ -32,22 +34,71 @@ void test_Strassen()
 
 	Strassen_MyTime.Start();
 	MatrixMult_Standard(N, &A, &B, &C1);
-	Strassen_MyTime.End();
+	Strassen_MyTime.End("Standard            ");
 
 	Strassen_MyTime.Start();
-	MatrixMult_OpenMP(N, &A, &B, &C2);
-	Strassen_MyTime.End();
+	MatrixMult_MultiThread(N, &A, &B, &C2);
+	Strassen_MyTime.End("MultiThread         ");
 
 	Strassen_MyTime.Start();
-	MatrixMult_Strassen(N, N,ZERO, ZERO, ZERO, &A, &B, &C3);
-	Strassen_MyTime.End();
+	MatrixMult_OpenMP(N, &A, &B, &C3);
+	Strassen_MyTime.End("OpenMP              ");
+
 
 	Strassen_MyTime.Start();
-	MatrixMult_Strassen_MultiThread(N,N, ZERO, ZERO, ZERO, &A, &B, &C4);
-	Strassen_MyTime.End();
+	MatrixMult_Strassen(N, N,ZERO, ZERO, ZERO, &A, &B, &C4);
+	Strassen_MyTime.End("Strassen            ");
 
-	MatrixCheck(N, &C3, &C4);
+	Strassen_MyTime.Start();
+	MatrixMult_Strassen_MultiThread(N,N, ZERO, ZERO, ZERO, &A, &B, &C5);
+	Strassen_MyTime.End("Strassen+MultiThread");
 
+	MatrixCheck(N, &C3, &C5);
+
+}
+
+void test_OpenMPvsMultiThread()
+{
+	Strassen_MyFile.makeFile("ParallelTest_20190502.csv");
+	Strassen_MyFile.write("Matrix Size");
+	Strassen_MyFile.write("Standard Multiplication");
+	Strassen_MyFile.write("OpenMP Multiplication");
+	Strassen_MyFile.write("Multithraed Multiplication");
+	Strassen_MyFile.changeRow();
+
+	Offset ZERO = { 0,0 };
+
+	int i;
+	for (i = 10; i < 501; i++)
+	{
+		vector<vector<int>> A(i, vector<int>(i, 0));
+		vector<vector<int>> B(i, vector<int>(i, 0));
+		vector<vector<int>> C(i, vector<int>(i, 0));
+
+		CreateRandomMatrix(i, &A);
+		CreateEyeMatrix(i, &B);
+
+		Strassen_MyFile.write(i);
+
+		Strassen_MyTime.Start();
+		MatrixMult_Standard(i, &A, &B, &C);
+		Strassen_MyTime.End();
+		Strassen_MyFile.write(Strassen_MyTime.GetTime());
+
+		Strassen_MyTime.Start();
+		MatrixMult_OpenMP(i, &A, &B, &C);
+		Strassen_MyTime.End();
+		Strassen_MyFile.write(Strassen_MyTime.GetTime());
+
+		Strassen_MyTime.Start();
+		MatrixMult_MultiThread(i, &A, &B, &C);
+		Strassen_MyTime.End();
+		Strassen_MyFile.write(Strassen_MyTime.GetTime());
+	
+		Strassen_MyFile.changeRow();
+	}
+	
+	Strassen_MyFile.closeFile();
 }
 
 void test_Threshold()
