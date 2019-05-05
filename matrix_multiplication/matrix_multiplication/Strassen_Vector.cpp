@@ -8,12 +8,14 @@ WriteCSV Strassen_MyFile;
 void test_Strassen();
 void test_OpenMPvsMultiThread();
 void test_StrassenvsStandard();
+void test_PaddingSize();
 
 void main()
 {
-	test_Strassen();
+	//test_Strassen();
 	//test_OpenMPvsMultiThread();
 	//test_StrassenvsStandard();
+	test_PaddingSize();
 
 }
 
@@ -98,17 +100,17 @@ void test_OpenMPvsMultiThread()
 
 void test_StrassenvsStandard()
 {
-	//Strassen_MyFile.makeFile("StrassenvsStandard_20190504.csv");
+	Strassen_MyFile.makeFile("StrassenvsStandard_20190506.csv");
 	Strassen_MyFile.write("Size");
 	Strassen_MyFile.write("Standard Multiplication");
-	Strassen_MyFile.write("OpenMP Multiplication");
+	//Strassen_MyFile.write("OpenMP Multiplication");
 	Strassen_MyFile.write("Strassen Multiplication");
 	Strassen_MyFile.changeRow();
 
 	Offset ZERO = { 0,0 };
 
 	int i;
-	for (i = 10; i < 1500; i++)
+	for (i = 10; i < 500; i++)
 	{
 		vector<vector<int>> A(i, vector<int>(i, 0));
 		vector<vector<int>> B(i, vector<int>(i, 0));
@@ -124,10 +126,10 @@ void test_StrassenvsStandard()
 		Strassen_MyTime.End();
 		Strassen_MyFile.write(Strassen_MyTime.GetTime());
 
-		Strassen_MyTime.Start();
-		MatrixMult_OpenMP(i, A, B, C);
-		Strassen_MyTime.End();
-		Strassen_MyFile.write(Strassen_MyTime.GetTime());
+		//Strassen_MyTime.Start();
+		//MatrixMult_OpenMP(i, A, B, C);
+		//Strassen_MyTime.End();
+		//Strassen_MyFile.write(Strassen_MyTime.GetTime());
 
 		Strassen_MyTime.Start();
 		MatrixMult_Strassen(i, A, B, C);
@@ -180,6 +182,46 @@ void test_StrassenvsStandard()
 
 	Strassen_MyFile.closeFile();*/
 }
+
+void test_PaddingSize()
+{
+	Strassen_MyFile.makeFile("PaddingSize_20190506.csv");
+	Strassen_MyFile.write("Matrix Size");
+	Strassen_MyFile.write("Naive Padded Size");
+	Strassen_MyFile.write("Optimal Padded Size");
+	Strassen_MyFile.changeRow();
+
+	int i;
+	for (i = 10; i < 501; i++)
+	{
+
+		Strassen_MyFile.write(i);
+		Strassen_MyFile.write(FindNaiveFaddingSize(i));
+		PadData temp = FindOptimalPaddingSize(i);
+		Strassen_MyFile.write(temp.m_Padsize);
+
+		Strassen_MyFile.changeRow();
+	}
+
+	Strassen_MyFile.closeFile();
+
+}
+
+int FindNaiveFaddingSize(const int n)
+{
+	// 10 < n < 500;
+	// 2^n 4, 16, 32, 64, 128, 256, 512
+
+	//if (!(n & (n - 1))) return 0;
+	if (n <= 4)     return 4;
+	else if (n <= 16)    return 16;
+	else if (n <= 32)    return 32;
+	else if (n <= 64)    return 64;
+	else if (n <= 128)   return 128;
+	else if (n <= 256)   return 256;
+	else                return 512;
+}
+
 
 PadData FindOptimalPaddingSize(const int n)
 {

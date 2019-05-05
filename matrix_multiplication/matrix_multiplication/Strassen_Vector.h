@@ -244,6 +244,26 @@ void MatrixMult_Standard(const int Size, const vector<vector<T>> &A, const vecto
 }
 
 template<typename T>
+void MatrixPartialMult_Standard(const int Size, const Offset A_Offset, const Offset B_Offset, const Offset C_Offset, const vector<vector<T>> &A, const vector<vector<T>> &B, vector<vector<T>> &C)
+{
+	for (int i = 0; i < Size; i++)
+	{
+		for (int j = 0; j < Size; j++)
+		{
+			for (int k = 0; k < Size; k++)
+			{
+				if (k)
+				{
+					C[i + C_Offset.i][j + C_Offset.j] += A[i + A_Offset.i][k + A_Offset.j] * B[k + B_Offset.i][j + B_Offset.j];
+				}
+				else
+					C[i + C_Offset.i][j + C_Offset.j] = A[i + A_Offset.i][k + A_Offset.j] * B[k + B_Offset.i][j + B_Offset.j];
+			}
+		}
+	}
+}
+
+template<typename T>
 void MatrixMult_OpenMP(const int Size, const vector<vector<T>> &A, const vector<vector<T>> &B, vector<vector<T>> &C)
 {
 	#pragma omp parallel
@@ -396,6 +416,8 @@ void MatrixPartialMult_Thread(const int Size, const int thread_num, const int th
 	}
 }
 
+int FindNaiveFaddingSize(const int n);
+
 PadData FindOptimalPaddingSize(const int n);
 
 template<typename T>
@@ -441,6 +463,7 @@ void MatrixMult_Strassen(const int Size, vector<vector<T>> &A, vector<vector<T>>
 {
 	if (Size <= 32)
 	{
+		//MatrixMult_Standard(Size, A, B, C);
 		MatrixMult_OpenMP(Size, A, B, C);
 	}
 	else
@@ -459,8 +482,9 @@ void MatrixMult_StrassenInnerLoop(const PadData Paddata, const int Size, const O
 {
 	if (Size <= Paddata.m_Threshold)
 	{
-		MatrixPartialMult_OpenMP(Size, A_Offset, B_Offset, C_Offset, A, B, C);
-		//MatrixPartialMult_MultiThread(Size, A_Offset, B_Offset, C_Offset, A, B, C);
+		//MatrixPartialMult_Standard(Size, A_Offset, B_Offset, C_Offset, A, B, C);
+		//MatrixPartialMult_OpenMP(Size, A_Offset, B_Offset, C_Offset, A, B, C);
+		MatrixPartialMult_MultiThread(Size, A_Offset, B_Offset, C_Offset, A, B, C);
 		return;
 	}
 
