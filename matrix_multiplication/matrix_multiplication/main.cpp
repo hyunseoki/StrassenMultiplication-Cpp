@@ -125,7 +125,7 @@
 ////}
 //
 //template<typename T>
-//void MatrixSum(const int n, const T *A, const T *B, T *C)
+//void MatrixSum_OpenMP(const int n, const T *A, const T *B, T *C)
 //{
 //	int i, j;
 //	for (i = 0; i < n; i++)
@@ -151,7 +151,7 @@
 //}
 //
 //template<typename T>
-//void MatrixSubs(const int n, const T *A, const T *B, T *C)
+//void MatrixSubs_OpenMP(const int n, const T *A, const T *B, T *C)
 //{
 //	int i, j;
 //	for (i = 0; i < n; i++)
@@ -242,7 +242,7 @@
 //	//T *B21 = B + 2 * n;
 //	//T *B22 = B;
 //
-//	//MatrixSum(m, A21, A22, AA);
+//	//MatrixSum_OpenMP(m, A21, A22, AA);
 //
 //	//MatrixPrint(m, A21);
 //	//MatrixPrint(m, A22);

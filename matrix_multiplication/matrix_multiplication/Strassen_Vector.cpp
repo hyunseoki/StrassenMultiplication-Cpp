@@ -21,7 +21,7 @@ void test_Strassen()
 {
 	//int N = 220;
 
-	for (int N = 35; N < 36; N++)
+	for (int N = 220; N < 225; N++)
 	{
 		vector<vector<int>> A(N, vector<int>(N, 0));
 		vector<vector<int>> B(N, vector<int>(N, 0));
@@ -36,14 +36,18 @@ void test_Strassen()
 
 		Offset ZERO = { 0,0 };
 
-		//Strassen_MyTime.Start();
+		Strassen_MyTime.Start();
 		MatrixMult_Standard(N, A, B, C1);
-		//Strassen_MyTime.End("Standard");
+		Strassen_MyTime.End("Standard");
 
-		//Strassen_MyTime.Start();
-		MatrixMult_Strassen(N, A, B, C2);
-		//Strassen_MyTime.End("Strassen");
-		MatrixCheck(N, C1, C2);
+		Strassen_MyTime.Start();
+		MatrixMult_OpenMP(N, A, B, C2);
+		Strassen_MyTime.End("OpenMP");
+
+		Strassen_MyTime.Start();
+		MatrixMult_Strassen(N, A, B, C3);
+		Strassen_MyTime.End("Strassen");
+		MatrixCheck(N, C1, C3);
 	}
 
 }
@@ -97,7 +101,7 @@ void test_StrassenvsStandard()
 	//Strassen_MyFile.makeFile("StrassenvsStandard_20190504.csv");
 	Strassen_MyFile.write("Size");
 	Strassen_MyFile.write("Standard Multiplication");
-	Strassen_MyFile.write("Multithraed Multiplication");
+	Strassen_MyFile.write("OpenMP Multiplication");
 	Strassen_MyFile.write("Strassen Multiplication");
 	Strassen_MyFile.changeRow();
 
@@ -134,6 +138,47 @@ void test_StrassenvsStandard()
 	}
 
 	Strassen_MyFile.closeFile();
+
+	/*Strassen_MyFile.makeFile("ParallelTest_20190505.csv");
+	Strassen_MyFile.write("Matrix Size");
+	Strassen_MyFile.write("Standard Summation");
+	Strassen_MyFile.write("OpenMP Summation");
+	Strassen_MyFile.write("Multithraed Summation");
+	Strassen_MyFile.changeRow();
+
+	Offset ZERO = { 0,0 };
+
+	int i;
+	for (i = 10; i < 2500; i++)
+	{
+		vector<vector<int>> A(i, vector<int>(i, 0));
+		vector<vector<int>> B(i, vector<int>(i, 0));
+		vector<vector<int>> C(i, vector<int>(i, 0));
+
+		CreateRandomMatrix(i, A);
+		CreateEyeMatrix(i, B);
+
+		Strassen_MyFile.write(i);
+
+		Strassen_MyTime.Start();
+		MatrixSum_Standard(i, A, B, C);
+		Strassen_MyTime.End();
+		Strassen_MyFile.write(Strassen_MyTime.GetTime());
+
+		Strassen_MyTime.Start();
+		MatrixSum_OpenMP(i, A, B, C);
+		Strassen_MyTime.End();
+		Strassen_MyFile.write(Strassen_MyTime.GetTime());
+
+		Strassen_MyTime.Start();
+		MatrixPartialSum_MultiThread(i, ZERO, ZERO, ZERO, A, B, C);
+		Strassen_MyTime.End();
+		Strassen_MyFile.write(Strassen_MyTime.GetTime());
+
+		Strassen_MyFile.changeRow();
+	}
+
+	Strassen_MyFile.closeFile();*/
 }
 
 PadData FindOptimalPaddingSize(const int n)
