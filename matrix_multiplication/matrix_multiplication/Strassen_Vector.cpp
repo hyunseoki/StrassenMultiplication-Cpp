@@ -13,9 +13,9 @@ void test_PaddingSize();
 void main()
 {
 	//test_Strassen();
-	//test_OpenMPvsMultiThread();
+	test_OpenMPvsMultiThread();
 	//test_StrassenvsStandard();
-	test_PaddingSize();
+	//test_PaddingSize();
 
 }
 
@@ -56,8 +56,11 @@ void test_Strassen()
 
 void test_OpenMPvsMultiThread()
 {
-	//Strassen_MyFile.makeFile("ParallelTest_20190502.csv");
+	Strassen_MyFile.makeFile("ParallelTest_20190506.csv");
 	Strassen_MyFile.write("Matrix Size");
+	Strassen_MyFile.write("Standard Sum");
+	Strassen_MyFile.write("OpenMP Sum");
+	Strassen_MyFile.write("Multithraed Sum");
 	Strassen_MyFile.write("Standard Multiplication");
 	Strassen_MyFile.write("OpenMP Multiplication");
 	Strassen_MyFile.write("Multithraed Multiplication");
@@ -71,11 +74,29 @@ void test_OpenMPvsMultiThread()
 		vector<vector<int>> A(i, vector<int>(i, 0));
 		vector<vector<int>> B(i, vector<int>(i, 0));
 		vector<vector<int>> C(i, vector<int>(i, 0));
+		vector<vector<int>> C1(i, vector<int>(i, 0));
 
 		CreateRandomMatrix(i, A);
 		CreateEyeMatrix(i, B);
 
 		Strassen_MyFile.write(i);
+
+		Strassen_MyTime.Start();
+		MatrixSum_Standard(i, A, B, C);
+		Strassen_MyTime.End();
+		Strassen_MyFile.write(Strassen_MyTime.GetTime());
+
+		Strassen_MyTime.Start();
+		MatrixSum_OpenMP(i, A, B, C);
+		Strassen_MyTime.End();
+		Strassen_MyFile.write(Strassen_MyTime.GetTime());
+
+		Strassen_MyTime.Start();
+		MatrixSum_MultiThread(i, A, B, C1);
+		Strassen_MyTime.End();
+		Strassen_MyFile.write(Strassen_MyTime.GetTime());
+		
+		MatrixCheck(i, C, C1);
 
 		Strassen_MyTime.Start();
 		MatrixMult_Standard(i, A, B, C);
@@ -91,8 +112,10 @@ void test_OpenMPvsMultiThread()
 		MatrixMult_MultiThread(i, A, B, C);
 		Strassen_MyTime.End();
 		Strassen_MyFile.write(Strassen_MyTime.GetTime());
-	
+		
 		Strassen_MyFile.changeRow();
+
+		
 	}
 	
 	Strassen_MyFile.closeFile();

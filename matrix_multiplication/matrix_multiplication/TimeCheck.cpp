@@ -19,7 +19,7 @@ void TimeCheck::End()
 	Print();
 }
 
-// Return (mmsec)
+// Return (ms)
 float TimeCheck::GetTime()
 {
 	return (float)(m_End - m_Start).count() / 1000.0f;
@@ -33,7 +33,7 @@ void TimeCheck::End(const char * s)
 
 void TimeCheck::Print()
 {
-	cout << " run time = " << (m_End - m_Start).count() / 1000 << "mm sec. \n";
+	cout << " run time = " << (m_End - m_Start).count() / 1000 << "ms. \n";
 }
 
 void TimeCheck::Print(const char * s)
