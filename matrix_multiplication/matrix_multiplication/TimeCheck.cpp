@@ -19,7 +19,8 @@ void TimeCheck::End()
 	Print();
 }
 
-// Return (ms)
+// Chrono의 기본 시간단위는 나노초
+// Return (micro sec)
 float TimeCheck::GetTime()
 {
 	return (float)(m_End - m_Start).count() / 1000.0f;

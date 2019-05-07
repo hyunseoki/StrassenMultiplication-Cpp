@@ -10,14 +10,13 @@ void test_OpenMPvsMultiThread();
 void test_StrassenvsStandard();
 void test_PaddingSize();
 
-void main()
-{
-	//test_Strassen();
-	test_OpenMPvsMultiThread();
-	//test_StrassenvsStandard();
-	//test_PaddingSize();
-
-}
+//void main()
+//{
+//	//test_Strassen();
+//	//test_OpenMPvsMultiThread();
+//	//test_StrassenvsStandard();
+//	
+//}
 
 void test_Strassen()
 {
@@ -123,17 +122,17 @@ void test_OpenMPvsMultiThread()
 
 void test_StrassenvsStandard()
 {
-	Strassen_MyFile.makeFile("StrassenvsStandard_20190506.csv");
+	Strassen_MyFile.makeFile("StrassenvsStandard_20190507.csv");
 	Strassen_MyFile.write("Size");
 	Strassen_MyFile.write("Standard Multiplication");
-	//Strassen_MyFile.write("OpenMP Multiplication");
+	Strassen_MyFile.write("OpenMP Multiplication");
 	Strassen_MyFile.write("Strassen Multiplication");
 	Strassen_MyFile.changeRow();
 
 	Offset ZERO = { 0,0 };
 
 	int i;
-	for (i = 10; i < 500; i++)
+	for (i = 10; i < 1000; i++)
 	{
 		vector<vector<int>> A(i, vector<int>(i, 0));
 		vector<vector<int>> B(i, vector<int>(i, 0));
@@ -144,15 +143,15 @@ void test_StrassenvsStandard()
 
 		Strassen_MyFile.write(i);
 
-		Strassen_MyTime.Start();
+		/*Strassen_MyTime.Start();
 		MatrixMult_Standard(i, A, B, C);
 		Strassen_MyTime.End();
-		Strassen_MyFile.write(Strassen_MyTime.GetTime());
+		Strassen_MyFile.write(Strassen_MyTime.GetTime());*/
 
-		//Strassen_MyTime.Start();
-		//MatrixMult_OpenMP(i, A, B, C);
-		//Strassen_MyTime.End();
-		//Strassen_MyFile.write(Strassen_MyTime.GetTime());
+		Strassen_MyTime.Start();
+		MatrixMult_OpenMP(i, A, B, C);
+		Strassen_MyTime.End();
+		Strassen_MyFile.write(Strassen_MyTime.GetTime());
 
 		Strassen_MyTime.Start();
 		MatrixMult_Strassen(i, A, B, C);
@@ -232,10 +231,6 @@ void test_PaddingSize()
 
 int FindNaiveFaddingSize(const int n)
 {
-	// 10 < n < 500;
-	// 2^n 4, 16, 32, 64, 128, 256, 512
-
-	//if (!(n & (n - 1))) return 0;
 	if (n <= 4)     return 4;
 	else if (n <= 16)    return 16;
 	else if (n <= 32)    return 32;
@@ -258,7 +253,7 @@ PadData FindOptimalPaddingSize(const int n)
 		cnt++;
 	}
 
-	result.m_Padsize = (int)q * pow(2, cnt);
+	result.m_Padsize = (int) (q * pow(2, cnt));
 	result.m_Threshold = (int)q;
 
 	return result;

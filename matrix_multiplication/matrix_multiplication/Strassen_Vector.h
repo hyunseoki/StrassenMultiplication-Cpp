@@ -122,8 +122,6 @@ void MatrixSum_Standard(const int Size, const vector<vector<T>> &A, const vector
 	}
 }
 
-
-
 template<typename T>
 void MatrixSum_OpenMP(const int Size, const vector<vector<T>> &A, const vector<vector<T>> &B, vector<vector<T>> &C)
 {
@@ -558,8 +556,8 @@ void MatrixMult_Strassen(const int Size, vector<vector<T>> &A, vector<vector<T>>
 {
 	if (Size <= 32)
 	{
-		//MatrixMult_Standard(Size, A, B, C);
-		MatrixMult_OpenMP(Size, A, B, C);
+		MatrixMult_Standard(Size, A, B, C);
+		//MatrixMult_OpenMP(Size, A, B, C);
 	}
 	else
 	{
