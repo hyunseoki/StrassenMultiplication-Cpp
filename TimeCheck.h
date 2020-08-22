@@ -2,7 +2,7 @@
 #include <chrono>
 #include <iostream>
 
-using std::chrono::high_resolution_clock;
+using namespace std::chrono;
 using std::cout;
 using std::string;
 

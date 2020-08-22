@@ -1,4 +1,3 @@
-#pragma once
 #include "Strassen_Vector.h"
 #include <opencv2\opencv.hpp>
 #include "WriteCSV.h"
@@ -10,7 +9,7 @@ using std::cout;
 TimeCheck Main_MyTime;
 WriteCSV Main_MyFile;
 
-void main()
+int main(int argc, char * argv[])
 {
 	int i, j, k;
 
@@ -42,7 +41,7 @@ void main()
 		{
 			for (k = 0; k < i; k++)
 			{
-				ranNb[0] = (int)(rand() * 10 / 32767); // 0 ~ 10.0 ³­¼ö
+				ranNb[0] = (int)(rand() * 10 / 32767); // 0 ~ 10.0 ï¿½ï¿½ï¿½ï¿½
 				ranNb[1] = (int)(rand() * 10 / 32767);
 
 				cv_A.at<float>(j, k) = ranNb[0];
@@ -77,4 +76,6 @@ void main()
 
 		Main_MyFile.changeRow();
 	}
+
+	return EXIT_SUCCESS;
 }

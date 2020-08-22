@@ -8,9 +8,9 @@ public:
 	~WriteCSV();
 	void makeFile(const char * filename);
 	void write(const char * s);
-	void WriteCSV::write(const int s);
-	void WriteCSV::write(const float s);
-	void WriteCSV::changeRow();
+	void write(const int s);
+	void write(const float s);
+	void changeRow();
 	void closeFile();
 
 private:

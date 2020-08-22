@@ -10,16 +10,16 @@ TimeCheck::~TimeCheck()
 
 void TimeCheck::Start()
 {
-	m_Start = high_resolution_clock::now();
+	m_Start = steady_clock::now();
 }
 
 void TimeCheck::End()
 {
-	m_End = high_resolution_clock::now();
+	m_End = steady_clock::now();
 	Print();
 }
 
-// ChronoÀÇ ±âº» ½Ã°£´ÜÀ§´Â ³ª³ëÃÊ
+// Chronoï¿½ï¿½ ï¿½âº» ï¿½Ã°ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 // Return (micro sec)
 float TimeCheck::GetTime()
 {
@@ -28,7 +28,7 @@ float TimeCheck::GetTime()
 
 void TimeCheck::End(const char * s)
 {
-	m_End = high_resolution_clock::now();
+	m_End = steady_clock::now();
 	Print(s);
 }
 

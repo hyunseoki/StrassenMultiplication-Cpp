@@ -23,10 +23,9 @@ struct PadData
 template<typename T>
 void MatrixTrans(const int Size, vector<vector<T>> &A, vector<vector<T>> &B)
 {
-	int i, j
-	for (i = 0; i<n; i++)
+	for (int i = 0; i < Size; i++)
 	{
-		for (j = 0; j<n; j++)
+		for (int j = 0; j< Size; j++)
 		{
 			B[j*Size + i] = A[i*Size + j];
 		}
@@ -456,22 +455,6 @@ void MatrixMult_MultiThread(const int Size, const vector<vector<T>> &A, const ve
 	}
 }
 
-template<typename T>
-void MatrixPartialMult_MultiThread(const int Size, const Offset A_Offset, const Offset B_Offset, const Offset C_Offset, const vector<vector<T>> &A, const vector<vector<T>> &B, vector<vector<T>> &C)
-{
-	const int THREADS_NUM = 16;
-	thread t[THREADS_NUM];
-
-	for (int i = 0; i < THREADS_NUM; i++)
-	{
-		t[i] = thread(MatrixPartialMult_Thread<T>, ref(Size), ref(THREADS_NUM), ref(i), ref(A_Offset), ref(B_Offset), ref(C_Offset), ref(A), ref(B), ref(C));
-	}
-
-	for (int i = 0; i < THREADS_NUM; i++)
-	{
-		t[i].join();
-	}
-}
 
 template<typename T>
 void MatrixPartialMult_Thread(const int Size, const int thread_num, const int thread_idx, const Offset A_Offset, const Offset B_Offset, const Offset C_Offset, const vector<vector<T>> &A, const vector<vector<T>> &B, vector<vector<T>> &C)
@@ -506,6 +489,28 @@ void MatrixPartialMult_Thread(const int Size, const int thread_num, const int th
 		}
 
 		C[C_Offset.i + row][C_Offset.j + col] = r;
+	}
+}
+
+template<typename T>
+void MatrixPartialMult_MultiThread(const int Size, const Offset A_Offset, const Offset B_Offset, const Offset C_Offset, const vector<vector<T>> &A, const vector<vector<T>> &B, vector<vector<T>> &C)
+{
+	const int THREADS_NUM = 16;
+	thread t[THREADS_NUM];
+
+	for (int i = 0; i < THREADS_NUM; i++)
+	{
+		t[i] = thread(MatrixPartialMult_Thread<T>,
+					ref(Size), 
+					ref(THREADS_NUM), 
+					ref(i), 
+					ref(A_Offset), ref(B_Offset), ref(C_Offset), 
+					ref(A), ref(B), ref(C));
+	}
+
+	for (int i = 0; i < THREADS_NUM; i++)
+	{
+		t[i].join();
 	}
 }
 
