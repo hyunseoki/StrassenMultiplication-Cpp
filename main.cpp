@@ -1,5 +1,5 @@
-#include "Strassen_Vector.h"
-#include <opencv2\opencv.hpp>
+#include "Strassen.h"
+#include <opencv2/opencv.hpp>
 #include "WriteCSV.h"
 #include "TimeCheck.h"
        
@@ -11,8 +11,6 @@ WriteCSV Main_MyFile;
 
 int main(int argc, char * argv[])
 {
-	int i, j, k;
-
 	Main_MyFile.makeFile("OpenCVvsStrassen_20190507.csv");
 	Main_MyFile.write("Matrix Size");
 	Main_MyFile.write("Naive Multiplication");
@@ -21,7 +19,7 @@ int main(int argc, char * argv[])
 	Main_MyFile.write("Strassen Multiplication");
 	Main_MyFile.changeRow();
 
-	for (i = 5; i < 510; i++)
+	for (int i = 5; i < 510; i++)
 	{
 		Mat cv_A(i, i, CV_32F);
 		Mat cv_B(i, i, CV_32F);
@@ -37,9 +35,9 @@ int main(int argc, char * argv[])
 
 		int ranNb[2];
 
-		for (j = 0; j < i; j++)
+		for (int j = 0; j < i; j++)
 		{
-			for (k = 0; k < i; k++)
+			for (int k = 0; k < i; k++)
 			{
 				ranNb[0] = (int)(rand() * 10 / 32767); // 0 ~ 10.0 ����
 				ranNb[1] = (int)(rand() * 10 / 32767);
